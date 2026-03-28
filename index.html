@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aletheia — Assurance Infrastructure for Clinical AI</title>
+<meta name="description" content="Aletheia finds shortcuts, confounders, and unstable reasoning inside clinical AI models — and turns findings into regulatory-grade evidence.">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void: #030609;
+  --ink: #070B12;
+  --ink-2: #0C1220;
+  --ink-3: #111827;
+  --surface: #151C2C;
+  --teal: #00D4C8;
+  --teal-dim: rgba(0,212,200,0.10);
+  --teal-border: rgba(0,212,200,0.20);
+  --teal-glow: rgba(0,212,200,0.04);
+  --cream: #E8E2D6;
+  --white: #F5F2EC;
+  --text-1: rgba(232,226,214,0.92);
+  --text-2: rgba(232,226,214,0.55);
+  --text-3: rgba(232,226,214,0.30);
+  --border: rgba(232,226,214,0.08);
+  --border-2: rgba(232,226,214,0.04);
+  --red: #EF4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #F59E0B;
+  --amber-dim: rgba(245,158,11,0.12);
+  --green: #10B981;
+  --green-dim: rgba(16,185,129,0.10);
+  --blue: #3B82F6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --serif: 'Fraunces', 'Georgia', serif;
+  --sans: 'DM Sans', -apple-system, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(0,212,200,0.25); color: var(--white); }
+
+#landing { display: block; }
+#app-demo { display: none; }
+body.show-demo #landing { display: none; }
+body.show-demo #app-demo { display: flex; }
+
+/* ─── NAV ─── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem; height: 64px;
+  background: rgba(7,11,18,0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 0.65rem;
+  text-decoration: none; cursor: pointer;
+}
+.nav-logo { height: 28px; width: auto; }
+.nav-wordmark {
+  font-family: var(--serif);
+  font-size: 1.2rem; font-weight: 500;
+  letter-spacing: 0.02em; color: var(--white);
+}
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a {
+  font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-2); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  background: var(--teal) !important;
+  color: var(--ink) !important;
+  padding: 0.5rem 1.2rem !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  transition: all 0.2s !important;
+  border: none !important;
+  cursor: pointer;
+}
+.nav-cta:hover { background: var(--white) !important; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8rem 3rem 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 65% 35%, rgba(0,212,200,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 50% at 15% 65%, rgba(59,130,246,0.04) 0%, transparent 70%);
+}
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(232,226,214,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,226,214,0.02) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 0%, transparent 100%);
+}
+.hero-inner { position: relative; z-index: 1; max-width: 820px; }
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  border: 1px solid var(--teal-border);
+  background: var(--teal-glow);
+  padding: 0.3rem 0.85rem 0.3rem 0.6rem;
+  border-radius: 100px;
+  font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 2.5rem;
+  animation: fadeUp 0.7s var(--ease) both;
+}
+.hero-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: blink 2.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 300; line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  margin-bottom: 1.8rem;
+  animation: fadeUp 0.7s 0.08s var(--ease) both;
+}
+h1 em { font-style: italic; color: var(--teal); font-weight: 400; }
+
+.hero-sub {
+  font-size: 1.05rem; font-weight: 300; color: var(--text-2);
+  max-width: 540px; line-height: 1.75;
+  margin-bottom: 3rem;
+  animation: fadeUp 0.7s 0.16s var(--ease) both;
+}
+
+.hero-actions {
+  display: flex; gap: 1rem; align-items: center;
+  animation: fadeUp 0.7s 0.24s var(--ease) both;
+}
+
+.btn-primary {
+  background: var(--teal); color: var(--ink);
+  padding: 0.8rem 1.8rem;
+  font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  border: none; cursor: pointer; border-radius: 4px;
+  text-decoration: none; font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--white); }
+
+.btn-ghost {
+  color: var(--text-2);
+  padding: 0.8rem 1.8rem;
+  font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: transparent; cursor: pointer; border-radius: 4px;
+  text-decoration: none; font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-ghost:hover { color: var(--white); border-color: var(--text-3); }
+
+.hero-stats {
+  display: flex; gap: 3.5rem; margin-top: 5rem;
+  padding-top: 2.5rem; border-top: 1px solid var(--border);
+  animation: fadeUp 0.7s 0.32s var(--ease) both;
+}
+.hero-stat-num {
+  font-family: var(--serif);
+  font-size: 2rem; font-weight: 400; color: var(--white);
+  line-height: 1;
+}
+.hero-stat-num span { color: var(--teal); }
+.hero-stat-label { font-size: 0.72rem; color: var(--text-3); letter-spacing: 0.06em; margin-top: 0.35rem; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── SECTIONS ─── */
+section { padding: 7rem 3rem; }
+.section-tag {
+  font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.section-tag::before {
+  content: ''; width: 24px; height: 1px; background: var(--teal);
+}
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 300; line-height: 1.15;
+  color: var(--white); margin-bottom: 1rem;
+}
+h2 em { font-style: italic; color: var(--teal); font-weight: 400; }
+
+/* ─── PROBLEM ─── */
+.problem { background: var(--ink); }
+.problem-inner { max-width: 1080px; margin: 0 auto; }
+.problem-lead { max-width: 620px; margin-bottom: 4rem; }
+.problem-lead p { color: var(--text-2); font-size: 1rem; line-height: 1.8; margin-top: 1rem; }
+.problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.problem-card { background: var(--ink); padding: 2rem; transition: background 0.2s; position: relative; }
+.problem-card:hover { background: var(--ink-2); }
+.problem-card::before {
+  content: attr(data-num); position: absolute; top: 1.5rem; right: 1.5rem;
+  font-family: var(--serif); font-size: 2rem; color: var(--text-3); opacity: 0.4;
+}
+.problem-card h3 { font-size: 0.95rem; font-weight: 500; color: var(--white); margin-bottom: 0.6rem; }
+.problem-card p { font-size: 0.84rem; color: var(--text-2); line-height: 1.7; }
+
+/* ─── WORKFLOW ─── */
+.workflow { background: var(--ink-2); }
+.workflow-inner { max-width: 1080px; margin: 0 auto; }
+.workflow-header { max-width: 560px; margin-bottom: 4rem; }
+.workflow-header p { color: var(--text-2); font-size: 1rem; margin-top: 1rem; }
+.workflow-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.wf-step {
+  background: var(--ink-2); padding: 2.2rem 1.8rem;
+  position: relative; transition: background 0.2s;
+}
+.wf-step:hover { background: var(--ink-3); }
+.wf-step::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: transparent; transition: background 0.25s;
+}
+.wf-step:hover::after { background: var(--teal); }
+.wf-num {
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.12em; color: var(--teal); margin-bottom: 1.2rem;
+}
+.wf-title { font-size: 0.95rem; font-weight: 500; color: var(--white); margin-bottom: 0.6rem; }
+.wf-body { font-size: 0.82rem; color: var(--text-2); line-height: 1.7; margin-bottom: 1rem; }
+.wf-meta { font-size: 0.7rem; color: var(--text-3); font-family: var(--mono); }
+
+/* ─── QUOTE ─── */
+.quote-section {
+  background: var(--ink); padding: 7rem 3rem; text-align: center;
+}
+.quote-inner { max-width: 680px; margin: 0 auto; }
+.big-quote {
+  font-family: var(--serif);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 300; line-height: 1.45; color: var(--white);
+  margin-bottom: 1.5rem;
+}
+.big-quote em { font-style: italic; color: var(--teal); }
+
+/* ─── REGULATORY ─── */
+.regulatory {
+  background: linear-gradient(160deg, var(--ink-2) 0%, var(--ink) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.reg-inner { max-width: 1080px; margin: 0 auto; }
+.reg-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 5rem; align-items: start; margin-top: 4rem; }
+.reg-left h3 {
+  font-family: var(--serif); font-size: 1.6rem; font-weight: 300;
+  color: var(--white); line-height: 1.25; margin-bottom: 1rem;
+}
+.reg-left p { font-size: 0.88rem; color: var(--text-2); line-height: 1.7; }
+.reg-items { display: flex; flex-direction: column; }
+.reg-item {
+  display: flex; gap: 1.5rem; padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.reg-item:first-child { border-top: 1px solid var(--border); }
+.reg-year {
+  font-family: var(--mono); font-size: 0.75rem;
+  color: var(--teal); min-width: 56px; padding-top: 2px;
+}
+.reg-body { flex: 1; }
+.reg-title { font-size: 0.88rem; font-weight: 500; color: var(--cream); margin-bottom: 0.3rem; }
+.reg-desc { font-size: 0.8rem; color: var(--text-2); line-height: 1.65; }
+
+/* ─── CTA ─── */
+.cta-section {
+  background: var(--ink-2); padding: 8rem 3rem;
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 45% 70% at 50% 50%, rgba(0,212,200,0.05) 0%, transparent 70%);
+}
+.cta-inner { position: relative; z-index: 1; max-width: 580px; margin: 0 auto; }
+.cta-section p { color: var(--text-2); margin-bottom: 2.5rem; font-size: 1rem; margin-top: 1rem; }
+.cta-actions { display: flex; gap: 1rem; justify-content: center; }
+.cta-fine { margin-top: 2rem; font-size: 0.72rem; color: var(--text-3); }
+
+/* ─── FOOTER ─── */
+.footer-landing {
+  background: var(--void); border-top: 1px solid var(--border);
+  padding: 2.5rem 3rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-brand { display: flex; align-items: center; gap: 0.5rem; }
+.footer-brand img { height: 20px; }
+.footer-brand-text {
+  font-family: var(--serif); font-size: 1rem; font-weight: 500;
+  color: var(--text-2); letter-spacing: 0.04em;
+}
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a { font-size: 0.75rem; color: var(--text-3); text-decoration: none; }
+.footer-links a:hover { color: var(--text-2); }
+
+/* ─── REVEAL ─── */
+.reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s var(--ease); }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ═══════════════════════════════════
+   APP DEMO
+═══════════════════════════════════ */
+
+#app-demo {
+  height: 100vh; overflow: hidden;
+  font-family: var(--sans);
+}
+
+.demo-sidebar {
+  width: 248px; background: var(--ink-2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  flex-shrink: 0; height: 100vh; overflow-y: auto;
+}
+
+.demo-sidebar-brand {
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.6rem;
+  cursor: pointer;
+}
+.demo-sidebar-brand img { height: 22px; }
+.demo-logo-text {
+  font-family: var(--serif);
+  font-size: 1rem; font-weight: 500; letter-spacing: 0.02em;
+  color: var(--white);
+}
+.demo-version {
+  margin-left: auto; font-family: var(--mono); font-size: 0.48rem;
+  color: var(--text-3); background: rgba(255,255,255,0.05);
+  padding: 0.1rem 0.3rem; border-radius: 3px;
+}
+
+.demo-audit-info {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+}
+.demo-audit-label { font-size: 0.6rem; color: var(--text-3); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+.demo-audit-name { font-family: var(--mono); font-size: 0.72rem; color: var(--teal); font-weight: 500; }
+.demo-audit-sub { font-size: 0.68rem; color: var(--text-3); margin-top: 0.2rem; }
+.demo-audit-pill {
+  display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.4rem;
+  font-family: var(--mono); font-size: 0.5rem;
+  background: var(--green-dim); color: var(--green);
+  padding: 0.15rem 0.45rem; border-radius: 3px;
+}
+.demo-audit-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); animation: blink 1.6s ease infinite; }
+
+.demo-nav-section { padding: 0.7rem 1.2rem 0.2rem; }
+.demo-nav-section-label { font-size: 0.58rem; color: var(--text-3); letter-spacing: 0.15em; text-transform: uppercase; }
+
+.demo-nav-item {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.5rem 1.2rem; font-size: 0.78rem; color: var(--text-2);
+  cursor: pointer; border-right: 2px solid transparent;
+  transition: all 0.12s; user-select: none;
+}
+.demo-nav-item:hover { color: var(--cream); background: rgba(255,255,255,0.02); }
+.demo-nav-item.active { color: var(--cream); border-right-color: var(--teal); background: var(--teal-glow); }
+.demo-nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+.demo-nav-item.active .demo-nav-dot { background: var(--teal); }
+.demo-nav-badge {
+  margin-left: auto; font-size: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 100px;
+  font-family: var(--mono);
+}
+.nb-red { background: var(--red-dim); color: #F87171; }
+.nb-amber { background: var(--amber-dim); color: #FCD34D; }
+.nb-green { background: var(--green-dim); color: #6EE7B7; }
+
+.demo-sidebar-bottom {
+  margin-top: auto; padding: 1rem 1.2rem;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.demo-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 600; color: #fff;
+}
+
+/* ─── MAIN AREA ─── */
+.demo-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.demo-topbar {
+  height: 48px; background: var(--ink-2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 1.6rem;
+  gap: 0.8rem; flex-shrink: 0;
+}
+.demo-bc { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; }
+.demo-bc span { color: var(--text-3); }
+.demo-bc .active { color: var(--cream); }
+.demo-topbar-right { margin-left: auto; display: flex; gap: 0.6rem; align-items: center; }
+.demo-status {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.68rem; color: var(--teal); font-family: var(--mono);
+}
+.demo-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: blink 2.5s infinite; }
+.btn-sm {
+  font-size: 0.7rem; letter-spacing: 0.06em; padding: 0.35rem 0.8rem;
+  border-radius: 4px; cursor: pointer; border: none; font-family: var(--sans); font-weight: 500;
+}
+.btn-teal { background: var(--teal); color: var(--ink); }
+.btn-outline { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+.btn-outline:hover { color: var(--cream); border-color: var(--text-3); }
+
+.demo-content { flex: 1; overflow-y: auto; padding: 0; }
+
+/* ─── SCREENS ─── */
+.screen { display: none; padding: 1.6rem; }
+.screen.active { display: block; }
+.screen-tag { font-size: 0.62rem; color: var(--teal); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+.screen-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 400; color: var(--cream); margin-bottom: 1.4rem; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 1.4rem; }
+.kpi-card { background: var(--ink-2); padding: 1rem 1.2rem; }
+.kpi-num { font-family: var(--serif); font-size: 1.8rem; color: var(--cream); line-height: 1; }
+.kpi-num.warn { color: var(--amber); }
+.kpi-num.danger { color: var(--red); }
+.kpi-num.good { color: var(--teal); }
+.kpi-label { font-size: 0.62rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
+.kpi-delta { font-size: 0.68rem; margin-top: 0.2rem; color: var(--text-3); }
+.kpi-delta.pos { color: #34D399; }
+.kpi-delta.neg { color: #F87171; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.panel { background: var(--ink-2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
+.panel-title { font-size: 0.65rem; color: var(--teal); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.8rem; }
+
+.finding-row { display: flex; gap: 0.8rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border-2); align-items: flex-start; }
+.finding-row:last-child { border: none; }
+.finding-icon { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; }
+.fi-red { background: var(--red-dim); color: #F87171; }
+.fi-amber { background: var(--amber-dim); color: #FCD34D; }
+.fi-green { background: var(--green-dim); color: #6EE7B7; }
+.finding-title { font-size: 0.8rem; color: var(--cream); font-weight: 400; }
+.finding-sub { font-size: 0.7rem; color: var(--text-2); margin-top: 0.1rem; }
+
+.badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.62rem; font-family: var(--mono); white-space: nowrap; }
+.b-red { background: var(--red-dim); color: #F87171; }
+.b-green { background: var(--green-dim); color: var(--teal); }
+.b-amber { background: var(--amber-dim); color: #FCD34D; }
+.b-blue { background: var(--blue-dim); color: #93C5FD; }
+
+/* Feature Atlas */
+.atlas-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+.atlas-filter {
+  background: var(--ink-2); border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.3rem 0.7rem; font-size: 0.72rem; color: var(--text-2);
+  cursor: pointer; font-family: var(--sans); transition: all 0.12s;
+}
+.atlas-filter:hover, .atlas-filter.active { color: var(--teal); border-color: var(--teal-border); background: var(--teal-dim); }
+.atlas-search {
+  background: var(--ink-2); border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.3rem 0.7rem; font-size: 0.72rem; color: var(--cream);
+  font-family: var(--sans); outline: none; min-width: 180px;
+}
+.atlas-search::placeholder { color: var(--text-3); }
+
+.feature-table { width: 100%; border-collapse: collapse; }
+.feature-table th {
+  font-size: 0.6rem; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); padding: 0.5rem 0.7rem; text-align: left; font-weight: 400;
+}
+.feature-table td { font-size: 0.76rem; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--border-2); color: var(--text-2); }
+.feature-table tbody tr { cursor: pointer; transition: background 0.1s; }
+.feature-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.feature-table tbody tr.selected { background: var(--teal-glow); border-left: 2px solid var(--teal); }
+.fid { font-family: var(--mono); font-size: 0.7rem; color: var(--teal); }
+.act-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+.act-bar-bg { background: var(--surface); border-radius: 100px; height: 4px; width: 50px; }
+.act-bar { height: 4px; border-radius: 100px; }
+
+/* Stress Tests */
+.stress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.stress-card { background: var(--ink-2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
+.stress-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.7rem; }
+.stress-title { font-size: 0.84rem; color: var(--cream); font-weight: 500; }
+.stress-status { font-size: 0.68rem; font-family: var(--mono); }
+.stress-status.pass { color: var(--teal); }
+.stress-status.fail { color: var(--red); }
+.stress-status.partial { color: var(--amber); }
+.stress-desc { font-size: 0.76rem; color: var(--text-2); line-height: 1.6; margin-bottom: 0.7rem; }
+.stress-metric { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-3); padding: 0.25rem 0; border-bottom: 1px solid var(--border-2); }
+.stress-metric:last-child { border: none; }
+.stress-metric span { color: var(--cream); font-family: var(--mono); }
+.stress-metric span.warn { color: var(--amber); }
+.stress-metric span.fail-val { color: var(--red); }
+
+/* Causal Validation */
+.causal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.causal-card { background: var(--ink-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.causal-card-header { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.causal-card-title { font-size: 0.82rem; font-weight: 500; color: var(--cream); }
+.causal-card-body { padding: 1rem 1.2rem; }
+.int-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border-2); font-size: 0.74rem; }
+.int-row:last-child { border: none; }
+.int-feature { color: var(--text-2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.int-delta { font-family: var(--mono); font-size: 0.7rem; flex-shrink: 0; }
+.int-delta.pos { color: var(--red); }
+.int-delta.neg { color: var(--teal); }
+
+/* Compliance Map */
+.compliance-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.reg-card-demo { background: var(--ink-2); border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; }
+.reg-card-demo h3 { font-size: 0.95rem; font-weight: 600; color: var(--white); margin-bottom: 0.3rem; }
+.reg-card-demo .sub { font-size: 0.7rem; color: var(--text-3); margin-bottom: 1rem; }
+.check-item { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid var(--border-2); }
+.check-item:last-child { border: none; }
+.check-dot { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; flex-shrink: 0; margin-top: 1px; }
+.dot-pass { background: var(--green-dim); color: var(--green); }
+.dot-warn { background: var(--amber-dim); color: var(--amber); }
+.dot-pending { background: var(--blue-dim); color: var(--blue); }
+.check-text { font-size: 0.72rem; color: var(--text-2); line-height: 1.55; }
+.check-text strong { color: var(--cream); font-weight: 500; display: block; margin-bottom: 0.15rem; font-size: 0.74rem; }
+
+/* Evidence Report */
+.ev-header { background: var(--ink-2); border: 1px solid var(--border); border-radius: 6px; padding: 1.4rem; margin-bottom: 1rem; display: flex; gap: 1.5rem; align-items: flex-start; }
+.ev-logo-block { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+.ev-logo-block img { height: 24px; }
+.ev-logo-block span { font-family: var(--serif); font-size: 0.85rem; font-weight: 500; color: var(--cream); }
+.ev-meta { flex: 1; }
+.ev-title { font-family: var(--serif); font-size: 1.2rem; color: var(--cream); }
+.ev-meta-row { display: flex; gap: 1.2rem; margin-top: 0.5rem; flex-wrap: wrap; }
+.ev-meta-item { font-size: 0.7rem; }
+.ev-meta-label { color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.58rem; margin-bottom: 0.1rem; }
+.ev-meta-val { color: var(--cream); font-family: var(--mono); }
+.ev-actions { display: flex; gap: 0.5rem; flex-shrink: 0; align-self: center; }
+.ev-sections { display: flex; flex-direction: column; gap: 0.7rem; }
+.ev-section { background: var(--ink-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.ev-section-header { padding: 0.8rem 1.1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+.ev-section-header:hover { background: rgba(255,255,255,0.02); }
+.ev-section-title { font-size: 0.8rem; color: var(--cream); font-weight: 500; }
+.ev-section-body { padding: 1rem 1.1rem; font-size: 0.78rem; color: var(--text-2); line-height: 1.7; }
+
+/* Sign-off */
+.signoff-list { display: flex; flex-direction: column; }
+.signoff-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid var(--border-2); }
+.signoff-row:last-child { border: none; }
+.signoff-role { font-size: 0.82rem; font-weight: 500; color: var(--cream); }
+.signoff-note { font-size: 0.72rem; color: var(--text-2); margin-top: 0.15rem; max-width: 400px; }
+
+.action-item { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-2); }
+.action-item:last-child { border: none; }
+.action-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.action-dot.red { background: var(--red); }
+.action-dot.amber { background: var(--amber); }
+.action-dot.green { background: var(--green); }
+.action-text { font-size: 0.76rem; color: var(--text-2); line-height: 1.5; }
+
+.progress-item { margin-bottom: 0.8rem; }
+.progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-2); margin-bottom: 0.35rem; }
+.progress-label span { color: var(--cream); }
+.progress-bar-bg { background: var(--surface); border-radius: 100px; height: 3px; }
+.progress-bar { height: 3px; border-radius: 100px; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  section { padding: 4rem 1.5rem; }
+  .hero { padding: 6rem 1.5rem 3rem; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .workflow-steps { grid-template-columns: 1fr; }
+  .reg-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .hero-stats { flex-wrap: wrap; gap: 2rem; }
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .stress-grid { grid-template-columns: 1fr; }
+  .causal-grid { grid-template-columns: 1fr; }
+  .compliance-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="landing">
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-brand" href="#" onclick="goLanding()">
+    <svg class="nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px"><rect width="32" height="32" rx="7" fill="url(#alg)"/><path d="M16 6L8 24h3.2l2-4.8h5.6L20.8 24H24L16 6zm0 5.6L19 19.2h-6L16 11.6z" fill="#070B12" fill-opacity="0.9"/><defs><linearGradient id="alg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00D4C8"/><stop offset="1" stop-color="#00A89E"/></linearGradient></defs></svg>
+    <span class="nav-wordmark">Aletheia</span>
+  </a>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#workflow">How it works</a>
+    <a href="#regulatory">Regulatory</a>
+    <a href="#" onclick="goDemo(event)">Platform demo</a>
+    <a href="#contact" class="nav-cta">Get in touch</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-pill">
+      <span class="hero-pill-dot"></span>
+      Design-partner audits now open
+    </div>
+    <h1>Know what your model<br>is <em>actually</em> doing &mdash;<br>before you ship it.</h1>
+    <p class="hero-sub">Aletheia opens up foundation model internals to find shortcuts, confounders, and unstable reasoning &mdash; then packages what it finds into evidence your QA, regulatory, and ML teams can act on.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Get in touch</a>
+      <a href="#" class="btn-ghost" onclick="goDemo(event)">See the platform &rarr;</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">4,096</div>
+        <div class="hero-stat-label">Sparse features per audit</div>
+      </div>
+      <div>
+        <div class="hero-stat-num"><span>410</span></div>
+        <div class="hero-stat-label">Biology features identified</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">9<span> tissue</span></div>
+        <div class="hero-stat-label">Classes covered</div>
+      </div>
+      <div>
+        <div class="hero-stat-num"><span>&lt;1</span> wk</div>
+        <div class="hero-stat-label">Intake to evidence pack</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem" id="problem">
+  <div class="problem-inner">
+    <div class="problem-lead reveal">
+      <div class="section-tag">The problem</div>
+      <h2>Strong benchmarks hide <em>weak reasoning.</em></h2>
+      <p>Pathology foundation models pass every benchmark thrown at them. But benchmarks don&rsquo;t tell you whether the model is relying on gland architecture or staining darkness. That distinction matters when a new lab&rsquo;s slides look different from training data.</p>
+    </div>
+    <div class="problem-grid reveal">
+      <div class="problem-card" data-num="01">
+        <h3>Two pathways, one metric</h3>
+        <p>Our experiments show models encode both a robust morphology pathway and a brittle stain-sensitive pathway. Standard AUC conflates them &mdash; you can&rsquo;t tell how much of your 97% accuracy comes from biology and how much from color shortcuts.</p>
+      </div>
+      <div class="problem-card" data-num="02">
+        <h3>Silent failure across labs</h3>
+        <p>Staining protocols, scanner manufacturers, and tissue processing differ between hospitals. Features that correlate with tissue type at one site become noise at another. Distribution shift is invisible until a patient is misclassified.</p>
+      </div>
+      <div class="problem-card" data-num="03">
+        <h3>Evidence that regulators can read</h3>
+        <p>EU AI Act Article 13 requires transparency evidence for high-risk medical AI from August 2026. SHAP values and attention maps don&rsquo;t answer the question regulators are asking: what concepts has this model learned, and are they sound?</p>
+      </div>
+      <div class="problem-card" data-num="04">
+        <h3>Internal review is not neutral</h3>
+        <p>The team that built the model is not well-positioned to audit its reasoning. Confirmation bias is structural. An independent interpretability audit provides evidence that stands up to external scrutiny.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="workflow" id="workflow">
+  <div class="workflow-inner">
+    <div class="workflow-header reveal">
+      <div class="section-tag">How it works</div>
+      <h2>From model internals to <em>release-ready evidence.</em></h2>
+      <p>Aletheia combines sparse autoencoder analysis with domain-specific stress tests and a structured evidence workflow. The output is a decision artifact, not a dashboard.</p>
+    </div>
+    <div class="workflow-steps reveal">
+      <div class="wf-step">
+        <div class="wf-num">01</div>
+        <div class="wf-title">Intake &amp; scoping</div>
+        <div class="wf-body">Define the safety claim, confirm model access, validate cohort breadth. Not every claim is testable &mdash; we figure that out before burning compute.</div>
+        <div class="wf-meta">Semi-automated &middot; 0.5&ndash;1 day</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">02</div>
+        <div class="wf-title">Representation extraction</div>
+        <div class="wf-body">Run validation cohorts through target layers and store the activations. These are the raw material for feature discovery &mdash; what the model has actually encoded.</div>
+        <div class="wf-meta">Automated &middot; Hours</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">03</div>
+        <div class="wf-title">Sparse feature discovery</div>
+        <div class="wf-body">Train sparse autoencoders on internal representations. Each learned feature maps to a single concept &mdash; a tissue type, a morphological pattern, or a staining artifact.</div>
+        <div class="wf-meta">Automated &middot; Hours&ndash;days</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">04</div>
+        <div class="wf-title">Biological triage</div>
+        <div class="wf-body">Classify every feature: is it biological signal or preparation artifact? Map clean features to tissue ontologies. Flag artifact-correlated features for causal testing.</div>
+        <div class="wf-meta">Semi-automated &middot; 1&ndash;2 days</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">05</div>
+        <div class="wf-title">Ablation &amp; causal validation</div>
+        <div class="wf-body">Zero out specific features and measure the downstream effect. This separates features the model depends on from features that are just along for the ride.</div>
+        <div class="wf-meta">Automated &middot; 1&ndash;3 days</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">06</div>
+        <div class="wf-title">Evidence pack export</div>
+        <div class="wf-body">Structured report with feature atlas, ablation results, confounder register, cross-site stability analysis, and regulatory mapping. Human sign-off required.</div>
+        <div class="wf-meta">Template-driven &middot; &lt;1 day</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <div class="quote-inner reveal">
+    <div class="big-quote">&ldquo;The question is not whether your model is accurate. It&rsquo;s whether it is accurate <em>for the right reasons</em> &mdash; and whether you can prove it when someone asks.&rdquo;</div>
+  </div>
+</div>
+
+<!-- REGULATORY -->
+<section class="regulatory" id="regulatory">
+  <div class="reg-inner">
+    <div class="section-tag reveal">Regulatory context</div>
+    <div class="reg-grid">
+      <div class="reg-left reveal">
+        <h3>The window for evidence-light deployment is closing.</h3>
+        <p>Three regulatory bodies are converging on the same requirement: AI medical devices must demonstrate that their internal reasoning is trustworthy &mdash; with documented evidence.</p>
+        <div style="margin-top: 2rem;">
+          <a href="#contact" class="btn-primary" style="display:inline-block;">Speak with us</a>
+        </div>
+      </div>
+      <div class="reg-items reveal">
+        <div class="reg-item">
+          <div class="reg-year">2025</div>
+          <div class="reg-body">
+            <div class="reg-title">FDA &mdash; AI-Enabled Device Software Lifecycle Guidance</div>
+            <div class="reg-desc">Draft guidance requires transparency and monitoring frameworks for AI/ML-based software as a medical device across the entire product lifecycle.</div>
+          </div>
+        </div>
+        <div class="reg-item">
+          <div class="reg-year">2026</div>
+          <div class="reg-body">
+            <div class="reg-title">EU AI Act &mdash; High-risk AI system obligations</div>
+            <div class="reg-desc">Medical device AI classified as high-risk must meet transparency, technical documentation, and human oversight requirements. Explainability is explicitly mandated under Article 13.</div>
+          </div>
+        </div>
+        <div class="reg-item">
+          <div class="reg-year">Active</div>
+          <div class="reg-body">
+            <div class="reg-title">MHRA &mdash; Project Glass Box (UK)</div>
+            <div class="reg-desc">MHRA&rsquo;s AI as a Medical Device programme targets explainability and transparency as core requirements for regulatory approval in Great Britain.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <div class="section-tag reveal" style="justify-content: center;">Get started</div>
+    <h2 class="reveal" style="text-align:center;">Book an introductory call.<br><em>Know before you ship.</em></h2>
+    <p class="reveal">Design-partner engagements are open for pathology AI teams preparing for deployment or regulatory submission. Scoped, structured, delivered in days.</p>
+    <div class="cta-actions reveal">
+      <a href="#contact" class="btn-primary">Get in touch</a>
+    </div>
+    <div class="cta-fine reveal">London, UK &middot; UCL Hatchery</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-landing">
+  <div class="footer-brand">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px"><rect width="32" height="32" rx="7" fill="url(#alg3)"/><path d="M16 6L8 24h3.2l2-4.8h5.6L20.8 24H24L16 6zm0 5.6L19 19.2h-6L16 11.6z" fill="#070B12" fill-opacity="0.9"/><defs><linearGradient id="alg3" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00D4C8"/><stop offset="1" stop-color="#00A89E"/></linearGradient></defs></svg>
+    <span class="footer-brand-text">Aletheia</span>
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+</div>
+<div id="app-demo">
+
+<!-- SIDEBAR -->
+<aside class="demo-sidebar">
+  <div class="demo-sidebar-brand" onclick="goLanding()">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px"><rect width="32" height="32" rx="7" fill="url(#alg2)"/><path d="M16 6L8 24h3.2l2-4.8h5.6L20.8 24H24L16 6zm0 5.6L19 19.2h-6L16 11.6z" fill="#070B12" fill-opacity="0.9"/><defs><linearGradient id="alg2" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00D4C8"/><stop offset="1" stop-color="#00A89E"/></linearGradient></defs></svg>
+    <span class="demo-logo-text">Aletheia</span>
+    <span class="demo-version">v1.0</span>
+  </div>
+  <div class="demo-audit-info">
+    <div class="demo-audit-label">Current audit</div>
+    <div class="demo-audit-name">Prov-GigaPath / NSCLC-v2</div>
+    <div class="demo-audit-sub">Pre-deployment &middot; Layers 18 &amp; 22</div>
+    <div class="demo-audit-pill"><div class="demo-audit-dot"></div>Complete &middot; Evidence ready</div>
+  </div>
+  <div class="demo-nav-section"><div class="demo-nav-section-label">Audit</div></div>
+  <div class="demo-nav-item active" onclick="showScreen('overview',this)">
+    <div class="demo-nav-dot"></div> Overview
+  </div>
+  <div class="demo-nav-item" onclick="showScreen('atlas',this)">
+    <div class="demo-nav-dot"></div> Feature Atlas
+    <div class="demo-nav-badge nb-red">7</div>
+  </div>
+  <div class="demo-nav-item" onclick="showScreen('causal',this)">
+    <div class="demo-nav-dot"></div> Causal Validation
+  </div>
+  <div class="demo-nav-item" onclick="showScreen('stress',this)">
+    <div class="demo-nav-dot"></div> Stress Tests
+  </div>
+  <div class="demo-nav-item" onclick="showScreen('compliance',this)">
+    <div class="demo-nav-dot"></div> Compliance Map
+  </div>
+  <div class="demo-nav-item" onclick="showScreen('evidence',this)">
+    <div class="demo-nav-dot"></div> Evidence Report
+  </div>
+  <div class="demo-nav-item" onclick="showScreen('signoff',this)">
+    <div class="demo-nav-dot"></div> Release Gate
+  </div>
+  <div class="demo-sidebar-bottom">
+    <div class="demo-avatar">MH</div>
+    <div>
+      <div style="color: var(--text-2); font-size: 0.7rem;">Mariam Hassan</div>
+      <div style="color: var(--text-3); font-size: 0.62rem;">Aletheia &middot; Founder</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="demo-main">
+  <div class="demo-topbar">
+    <div class="demo-bc">
+      <span>Aletheia</span>
+      <span>/</span>
+      <span>NSCLC-v2</span>
+      <span>/</span>
+      <span class="active" id="bc-current">Overview</span>
+    </div>
+    <div class="demo-topbar-right">
+      <div class="demo-status">
+        <div class="demo-status-dot"></div>
+        Analysis complete
+      </div>
+      <button class="btn-sm btn-outline" onclick="goLanding()">&#8592; Back to site</button>
+      <button class="btn-sm btn-teal">Export evidence pack</button>
+    </div>
+  </div>
+
+  <div class="demo-content">
+
+    <!-- OVERVIEW -->
+    <div class="screen active" id="screen-overview">
+      <div class="screen-tag">Audit overview</div>
+      <div class="screen-title">Prov-GigaPath &middot; NSCLC Subtype Classification &middot; Pre-deployment</div>
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-num">312</div><div class="kpi-label">Features discovered</div><div class="kpi-delta pos">Layers 18 &amp; 22</div></div>
+        <div class="kpi-card"><div class="kpi-num good">247</div><div class="kpi-label">Histological features</div><div class="kpi-delta pos">79% of total</div></div>
+        <div class="kpi-card"><div class="kpi-num danger">38</div><div class="kpi-label">Confounders flagged</div><div class="kpi-delta neg">Action required</div></div>
+        <div class="kpi-card"><div class="kpi-num warn">0.71</div><div class="kpi-label">Cross-site stability</div><div class="kpi-delta neg">&darr; Threshold 0.80</div></div>
+        <div class="kpi-card"><div class="kpi-num danger">Hold</div><div class="kpi-label">Release gate</div><div class="kpi-delta neg">2 blockers</div></div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Top findings</div>
+          <div class="finding-row"><div class="finding-icon fi-red">!</div><div><div class="finding-title">Scanner-type shortcut (feat_0203)</div><div class="finding-sub">Layer 22 &middot; Hamamatsu background signature encoded as predictive feature. Active in 34% of predictions.</div></div></div>
+          <div class="finding-row"><div class="finding-icon fi-red">!</div><div><div class="finding-title">Staining batch correlation (feat_0211)</div><div class="finding-sub">Layer 18 &middot; Eosin intensity gradient correlated with site origin. Causal ablation confirms &minus;0.09 AUC.</div></div></div>
+          <div class="finding-row"><div class="finding-icon fi-amber">!</div><div><div class="finding-title">Tissue fold artifact (feat_0256)</div><div class="finding-sub">Layer 18 &middot; Tissue folds spuriously correlated with ADC prediction. Active in 11% of predictions.</div></div></div>
+          <div class="finding-row"><div class="finding-icon fi-green">&check;</div><div><div class="finding-title">Nuclear pleomorphism validated (feat_0041)</div><div class="finding-sub">Layer 22 &middot; Stable across all sites. Confirmed causal with 0.91 confidence.</div></div></div>
+          <div class="finding-row"><div class="finding-icon fi-green">&check;</div><div><div class="finding-title">Glandular architecture (feat_0112)</div><div class="finding-sub">Layer 18 &middot; Histological grade component. Cross-site &Delta; &lt; 0.01.</div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Audit progress</div>
+          <div class="progress-item"><div class="progress-label">Feature discovery <span>100%</span></div><div class="progress-bar-bg"><div class="progress-bar" style="width:100%;background:var(--teal)"></div></div></div>
+          <div class="progress-item"><div class="progress-label">Biological triage <span>100%</span></div><div class="progress-bar-bg"><div class="progress-bar" style="width:100%;background:var(--teal)"></div></div></div>
+          <div class="progress-item"><div class="progress-label">Causal validation <span>312 experiments</span></div><div class="progress-bar-bg"><div class="progress-bar" style="width:100%;background:var(--teal)"></div></div></div>
+          <div class="progress-item"><div class="progress-label">Stress tests <span>4/6 passed</span></div><div class="progress-bar-bg"><div class="progress-bar" style="width:67%;background:var(--amber)"></div></div></div>
+          <div class="progress-item"><div class="progress-label">Evidence pack <span>Ready</span></div><div class="progress-bar-bg"><div class="progress-bar" style="width:100%;background:var(--teal)"></div></div></div>
+          <div class="progress-item"><div class="progress-label">Sign-off matrix <span>1/4 ready</span></div><div class="progress-bar-bg"><div class="progress-bar" style="width:25%;background:var(--red)"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE ATLAS -->
+    <div class="screen" id="screen-atlas">
+      <div class="screen-tag">Feature atlas</div>
+      <div class="screen-title">312 features &middot; Layers 18 &amp; 22 &middot; SAE sparsity 0.04</div>
+      <div class="atlas-controls">
+        <button class="atlas-filter active" onclick="setFilter(this)">All (312)</button>
+        <button class="atlas-filter" onclick="setFilter(this)">Histological (247)</button>
+        <button class="atlas-filter" onclick="setFilter(this)">&starf; Confounders (38)</button>
+        <button class="atlas-filter" onclick="setFilter(this)">Ambiguous (27)</button>
+        <input class="atlas-search" placeholder="Search features, ontologies&hellip;">
+      </div>
+      <table class="feature-table">
+        <thead><tr><th>ID</th><th>Feature / Concept</th><th>Type</th><th>Layer</th><th>Confidence</th><th>Causal Role</th><th>Active in</th><th>Cross-Site &Delta;</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(239,68,68,.025)"><td class="fid">feat_0203</td><td>scanner_bg_hamamatsu</td><td><span class="badge b-red">Confounder</span></td><td style="font-family:var(--mono)">L22</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:23%;background:var(--red)"></div></div>0.23</div></td><td style="font-size:.68rem;color:var(--red)">Confound &cross;</td><td style="font-family:var(--mono);color:var(--red)">34%</td><td style="font-family:var(--mono);color:var(--red)">&minus;0.14</td><td><span class="badge b-red">HIGH</span></td></tr>
+          <tr style="background:rgba(245,158,11,.02)"><td class="fid">feat_0211</td><td>stain_eosin_intensity</td><td><span class="badge b-red">Confounder</span></td><td style="font-family:var(--mono)">L18</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:31%;background:var(--red)"></div></div>0.31</div></td><td style="font-size:.68rem;color:var(--red)">Confound &cross;</td><td style="font-family:var(--mono);color:var(--amber)">19%</td><td style="font-family:var(--mono);color:var(--amber)">&minus;0.09</td><td><span class="badge b-amber">MED</span></td></tr>
+          <tr style="background:rgba(245,158,11,.02)"><td class="fid">feat_0256</td><td>tissue_fold_artifact</td><td><span class="badge b-red">Confounder</span></td><td style="font-family:var(--mono)">L18</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:44%;background:var(--amber)"></div></div>0.44</div></td><td style="font-size:.68rem;color:var(--red)">Confound &cross;</td><td style="font-family:var(--mono);color:var(--amber)">11%</td><td style="font-family:var(--mono);color:var(--amber)">&minus;0.06</td><td><span class="badge b-amber">MED</span></td></tr>
+          <tr class="selected"><td class="fid">feat_0041</td><td>nuclear_pleomorphism</td><td><span class="badge b-green">Histological</span></td><td style="font-family:var(--mono)">L22</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:91%;background:var(--teal)"></div></div>0.91</div></td><td style="font-size:.68rem;color:var(--green)">Causal &check;</td><td style="font-family:var(--mono)">67%</td><td style="font-family:var(--mono);color:var(--green)">&minus;0.02</td><td><span class="badge b-green">None</span></td></tr>
+          <tr><td class="fid">feat_0088</td><td>mitotic_index_proxy</td><td><span class="badge b-green">Histological</span></td><td style="font-family:var(--mono)">L22</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:87%;background:var(--teal)"></div></div>0.87</div></td><td style="font-size:.68rem;color:var(--green)">Causal &check;</td><td style="font-family:var(--mono)">58%</td><td style="font-family:var(--mono);color:var(--green)">&minus;0.03</td><td><span class="badge b-green">None</span></td></tr>
+          <tr><td class="fid">feat_0112</td><td>glandular_architecture</td><td><span class="badge b-green">Histological</span></td><td style="font-family:var(--mono)">L18</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:84%;background:var(--teal)"></div></div>0.84</div></td><td style="font-size:.68rem;color:var(--green)">Causal &check;</td><td style="font-family:var(--mono)">51%</td><td style="font-family:var(--mono);color:var(--green)">&minus;0.01</td><td><span class="badge b-green">None</span></td></tr>
+          <tr><td class="fid">feat_0219</td><td>lymphocyte_infiltration</td><td><span class="badge b-green">Histological</span></td><td style="font-family:var(--mono)">L22</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:79%;background:var(--teal)"></div></div>0.79</div></td><td style="font-size:.68rem;color:var(--green)">Causal &check;</td><td style="font-family:var(--mono)">44%</td><td style="font-family:var(--mono);color:var(--green)">&minus;0.02</td><td><span class="badge b-green">None</span></td></tr>
+          <tr><td class="fid" style="color:var(--amber)">feat_0287</td><td>stage_size_proxy</td><td><span class="badge b-amber">Ambiguous</span></td><td style="font-family:var(--mono)">L22</td><td><div class="act-bar-wrap"><div class="act-bar-bg"><div class="act-bar" style="width:58%;background:var(--amber)"></div></div>0.58</div></td><td style="font-size:.68rem;color:var(--amber)">Partial</td><td style="font-family:var(--mono);color:var(--amber)">22%</td><td style="font-family:var(--mono);color:var(--amber)">&minus;0.07</td><td><span class="badge b-amber">MED</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CAUSAL VALIDATION -->
+    <div class="screen" id="screen-causal">
+      <div class="screen-tag">Causal validation</div>
+      <div class="screen-title">312 ablation experiments &middot; 4,204 slides &middot; 2 cohorts</div>
+      <div class="causal-grid">
+        <div class="causal-card">
+          <div class="causal-card-header"><div class="causal-card-title">High-Impact Ablations</div><span class="badge b-amber">Top 6</span></div>
+          <div class="causal-card-body">
+            <div class="int-row"><div class="int-feature">Nuclear pleomorphism (feat_0041)</div><div class="int-delta neg">&minus;0.17 AUC</div></div>
+            <div class="int-row"><div class="int-feature">Glandular architecture (feat_0112)</div><div class="int-delta neg">&minus;0.12 AUC</div></div>
+            <div class="int-row"><div class="int-feature" style="color:var(--red)">&starf; Scanner artifact (feat_0203)</div><div class="int-delta pos">&minus;0.14 AUC</div></div>
+            <div class="int-row"><div class="int-feature">Mitotic index (feat_0088)</div><div class="int-delta neg">&minus;0.09 AUC</div></div>
+            <div class="int-row"><div class="int-feature" style="color:var(--red)">&starf; Eosin intensity (feat_0211)</div><div class="int-delta pos">&minus;0.09 AUC</div></div>
+            <div class="int-row"><div class="int-feature">Lymphocyte infiltration (feat_0219)</div><div class="int-delta neg">&minus;0.07 AUC</div></div>
+          </div>
+        </div>
+        <div class="causal-card">
+          <div class="causal-card-header"><div class="causal-card-title">Confounder Ablation Summary</div><span class="badge b-red">38 confounders</span></div>
+          <div class="causal-card-body">
+            <div class="int-row"><div class="int-feature" style="color:var(--red)">&starf; Scanner background</div><div class="int-delta pos">&minus;0.14</div></div>
+            <div class="int-row"><div class="int-feature" style="color:var(--red)">&starf; Eosin intensity</div><div class="int-delta pos">&minus;0.09</div></div>
+            <div class="int-row"><div class="int-feature" style="color:var(--red)">&starf; Tissue fold</div><div class="int-delta pos">&minus;0.06</div></div>
+            <div class="int-row"><div class="int-feature" style="color:var(--red)">&starf; Tissue edge artifact</div><div class="int-delta pos">&minus;0.04</div></div>
+            <div style="margin-top:0.7rem;padding:0.7rem;background:var(--surface);border-radius:4px;font-size:0.72rem;color:var(--text-2);line-height:1.6">
+              <strong style="color:var(--green)">Key finding:</strong> Ablating all confounder features simultaneously improves cross-site accuracy by 5.8% &mdash; confirming spurious signal dependency.
+            </div>
+          </div>
+        </div>
+        <div class="causal-card">
+          <div class="causal-card-header"><div class="causal-card-title">Negative Controls</div><span class="badge b-green">&check; Passed</span></div>
+          <div class="causal-card-body">
+            <p style="font-size:0.74rem;color:var(--text-2);line-height:1.6;margin-bottom:0.8rem">50 random low-activation features ablated. None produced classification changes exceeding 0.3% &mdash; confirming observed effects are feature-specific.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+              <div style="background:var(--surface);padding:0.7rem;border-radius:4px;text-align:center"><div style="font-size:1.2rem;font-weight:600;color:var(--green)">0 / 50</div><div style="font-size:0.62rem;color:var(--text-3)">Controls with &Delta; > 0.3%</div></div>
+              <div style="background:var(--surface);padding:0.7rem;border-radius:4px;text-align:center"><div style="font-size:1.2rem;font-weight:600;color:var(--teal)">0.04%</div><div style="font-size:0.62rem;color:var(--text-3)">Mean &Delta; across controls</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="causal-card">
+          <div class="causal-card-header"><div class="causal-card-title">Cross-Site Feature Stability</div><span class="badge b-amber">&starf; Below threshold</span></div>
+          <div class="causal-card-body">
+            <p style="font-size:0.74rem;color:var(--text-2);line-height:1.6;margin-bottom:0.8rem">Feature importance rankings consistent within TCGA (&rho; = 0.94). CPTAC-SAR diverges (&rho; = 0.71), driven by elevated confounder activations on unseen scanner types.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem">
+              <div style="background:var(--surface);padding:0.6rem;border-radius:4px;text-align:center"><div style="font-size:1.1rem;font-weight:600;color:var(--teal)">0.94</div><div style="font-size:0.58rem;color:var(--text-3)">TCGA internal &rho;</div></div>
+              <div style="background:var(--surface);padding:0.6rem;border-radius:4px;text-align:center"><div style="font-size:1.1rem;font-weight:600;color:var(--amber)">0.71</div><div style="font-size:0.58rem;color:var(--text-3)">TCGA&harr;CPTAC &rho;</div></div>
+              <div style="background:var(--surface);padding:0.6rem;border-radius:4px;text-align:center"><div style="font-size:1.1rem;font-weight:600;color:var(--red)">0.80</div><div style="font-size:0.58rem;color:var(--text-3)">Threshold</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STRESS TESTS -->
+    <div class="screen" id="screen-stress">
+      <div class="screen-tag">Stress tests</div>
+      <div class="screen-title">6 test suites &middot; 4 passed &middot; 2 failed</div>
+      <div class="stress-grid">
+        <div class="stress-card">
+          <div class="stress-header"><div class="stress-title">Cross-site generalisation</div><div class="stress-status fail">FAILED</div></div>
+          <div class="stress-desc">AUC measured on holdout site when trained on the remaining cohort.</div>
+          <div class="stress-metric"><span>TCGA internal AUC</span><span>0.93</span></div>
+          <div class="stress-metric"><span>TCGA &rarr; CPTAC transfer</span><span class="fail-val">0.71</span></div>
+          <div class="stress-metric"><span>Feature stability index</span><span class="warn">0.71</span></div>
+          <div class="stress-metric"><span>Threshold</span><span>&ge; 0.80</span></div>
+        </div>
+        <div class="stress-card">
+          <div class="stress-header"><div class="stress-title">Stain normalisation robustness</div><div class="stress-status fail">FAILED</div></div>
+          <div class="stress-desc">Model output variance under Macenko normalisation vs raw input.</div>
+          <div class="stress-metric"><span>Normalised AUC</span><span>0.901</span></div>
+          <div class="stress-metric"><span>Raw AUC</span><span class="fail-val">0.834</span></div>
+          <div class="stress-metric"><span>Delta</span><span class="fail-val">&minus;6.7%</span></div>
+          <div class="stress-metric"><span>Threshold</span><span>&Delta; &le; 3%</span></div>
+        </div>
+        <div class="stress-card">
+          <div class="stress-header"><div class="stress-title">Scanner make variation</div><div class="stress-status pass">PASSED</div></div>
+          <div class="stress-desc">Performance stratified by Hamamatsu vs Aperio vs Leica.</div>
+          <div class="stress-metric"><span>Max inter-scanner &Delta;</span><span>2.1%</span></div>
+          <div class="stress-metric"><span>Threshold</span><span>&le; 5%</span></div>
+        </div>
+        <div class="stress-card">
+          <div class="stress-header"><div class="stress-title">Subgroup fairness</div><div class="stress-status pass">PASSED</div></div>
+          <div class="stress-desc">AUC parity across patient demographics and tumour subtypes.</div>
+          <div class="stress-metric"><span>Max subgroup AUC gap</span><span>3.4%</span></div>
+          <div class="stress-metric"><span>Threshold</span><span>&le; 5%</span></div>
+        </div>
+        <div class="stress-card">
+          <div class="stress-header"><div class="stress-title">Occlusion intervention</div><div class="stress-status pass">PASSED</div></div>
+          <div class="stress-desc">Border masking reduces false positives, confirming validated feature contribution.</div>
+          <div class="stress-metric"><span>FP reduction with masking</span><span>14.2%</span></div>
+        </div>
+        <div class="stress-card">
+          <div class="stress-header"><div class="stress-title">Feature drift simulation</div><div class="stress-status pass">PASSED</div></div>
+          <div class="stress-desc">Synthetic distribution shift applied to confounder features.</div>
+          <div class="stress-metric"><span>AUC after drift</span><span>0.871</span></div>
+          <div class="stress-metric"><span>Threshold</span><span>&ge; 0.85</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLIANCE MAP -->
+    <div class="screen" id="screen-compliance">
+      <div class="screen-tag">Regulatory compliance map</div>
+      <div class="screen-title">EU AI Act &middot; MHRA AIaMD &middot; FDA SaMD lifecycle</div>
+      <div class="compliance-grid">
+        <div class="reg-card-demo">
+          <h3>EU AI Act</h3>
+          <div class="sub">High-risk AI &mdash; Articles 6&ndash;15, Annex IV</div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Art. 13 &mdash; Interpretation tools</strong>Feature dictionary with 312 interpretable features mapped to clinical ontologies.</div></div>
+          <div class="check-item"><div class="check-dot dot-warn">!</div><div class="check-text"><strong>Art. 9 &mdash; Risk management</strong>38 confounder features identified. 2 HIGH severity require remediation.</div></div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Annex IV &mdash; Technical documentation</strong>SAE architecture, training protocol, and validation pipeline documented.</div></div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Art. 15 &mdash; Accuracy &amp; robustness</strong>Cross-site stability analysis complete. 6 stress test suites executed.</div></div>
+        </div>
+        <div class="reg-card-demo">
+          <h3>MHRA AIaMD</h3>
+          <div class="sub">Project Glass Box &middot; AI as Medical Device</div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Interpretability evidence</strong>Feature-level explanations meet draft guidance on interrogability of AI reasoning.</div></div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Lifecycle monitoring</strong>Feature drift thresholds and production triggers documented.</div></div>
+          <div class="check-item"><div class="check-dot dot-pending">&cir;</div><div class="check-text"><strong>AI Airlock evaluation</strong>Methodology eligible for sandbox review. Application pending.</div></div>
+        </div>
+        <div class="reg-card-demo">
+          <h3>FDA SaMD</h3>
+          <div class="sub">AI/ML-Based SaMD Lifecycle Guidance</div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Model traceability</strong>Feature-to-outcome causal chain documented for 312 tested features.</div></div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>PCCP &mdash; Change control</strong>Feature drift thresholds established. Retraining triggers defined.</div></div>
+          <div class="check-item"><div class="check-dot dot-pass">&check;</div><div class="check-text"><strong>Good Machine Learning Practice</strong>Negative controls, cross-validation, and robustness diagnostics follow GMLP.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVIDENCE REPORT -->
+    <div class="screen" id="screen-evidence">
+      <div class="screen-tag">Evidence pack</div>
+      <div class="screen-title">Pre-Deployment Audit Report &mdash; Prov-GigaPath NSCLC-v2</div>
+      <div class="ev-header">
+        <div class="ev-logo-block"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px"><rect width="32" height="32" rx="7" fill="url(#alg4)"/><path d="M16 6L8 24h3.2l2-4.8h5.6L20.8 24H24L16 6zm0 5.6L19 19.2h-6L16 11.6z" fill="#070B12" fill-opacity="0.9"/><defs><linearGradient id="alg4" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00D4C8"/><stop offset="1" stop-color="#00A89E"/></linearGradient></defs></svg><span>Aletheia</span></div>
+        <div class="ev-meta">
+          <div class="ev-title">Mechanistic Interpretability Audit &mdash; Evidence Report</div>
+          <div style="font-size:0.78rem;color:var(--text-2);margin-top:0.2rem;">Prepared by Aletheia &middot; For internal QA and regulatory use</div>
+          <div class="ev-meta-row">
+            <div class="ev-meta-item"><div class="ev-meta-label">Report ref</div><div class="ev-meta-val">ATH-2026-0034</div></div>
+            <div class="ev-meta-item"><div class="ev-meta-label">Model</div><div class="ev-meta-val">Prov-GigaPath/NSCLC-v2</div></div>
+            <div class="ev-meta-item"><div class="ev-meta-label">Date</div><div class="ev-meta-val">28 Mar 2026</div></div>
+            <div class="ev-meta-item"><div class="ev-meta-label">Status</div><div class="ev-meta-val" style="color:var(--amber)">DRAFT</div></div>
+          </div>
+        </div>
+        <div class="ev-actions"><button class="btn-sm btn-outline">Preview PDF</button><button class="btn-sm btn-teal">Finalise &amp; export</button></div>
+      </div>
+      <div class="ev-sections">
+        <div class="ev-section"><div class="ev-section-header"><div class="ev-section-title">1. Executive summary &amp; release recommendation</div><span class="badge b-red">Hold</span></div>
+          <div class="ev-section-body">The audit identified 38 confounder features across 312 total. The model demonstrates strong within-site performance but carries documented shortcut dependency that reduces cross-site robustness. Scanner artifact (feat_0203) confirmed causal via ablation (&minus;0.14 AUC). Deployment to new sites not recommended without stain normalisation pipeline.</div>
+        </div>
+        <div class="ev-section"><div class="ev-section-header"><div class="ev-section-title">2. Feature atlas &mdash; 312 features catalogued</div><span class="badge b-amber">38 flagged</span></div><div class="ev-section-body">247 histological features mapped to NCIT, UBERON, and GO ontologies. 38 confounder features flagged. 27 features classified as ambiguous pending expert pathology review.</div></div>
+        <div class="ev-section"><div class="ev-section-header"><div class="ev-section-title">3. Causal validation &mdash; 312 ablation experiments</div><span class="badge b-green">Methodology validated</span></div><div class="ev-section-body">Ablation protocol confirmed by 50 negative controls (max &Delta; = 0.04%). Confounder ablation improves cross-site accuracy by 5.8%.</div></div>
+        <div class="ev-section"><div class="ev-section-header"><div class="ev-section-title">4. Stress test results &mdash; 6 suites, 2 failed</div><span class="badge b-red">2 failed</span></div><div class="ev-section-body">Cross-site generalisation and stain normalisation robustness tests failed. Scanner variation and subgroup fairness passed.</div></div>
+        <div class="ev-section"><div class="ev-section-header"><div class="ev-section-title">5. Regulatory alignment notes</div><span class="badge b-blue">Compliance ref</span></div><div class="ev-section-body">Report structured to support EU AI Act Article 13, FDA AIMD lifecycle guidance, and MHRA Project Glass Box requirements.</div></div>
+      </div>
+    </div>
+
+    <!-- RELEASE GATE -->
+    <div class="screen" id="screen-signoff">
+      <div class="screen-tag">Release gate</div>
+      <div class="screen-title">Sign-off matrix &amp; open actions</div>
+      <div class="two-col" style="margin-bottom:1rem">
+        <div class="panel">
+          <div class="panel-title">Current gate status</div>
+          <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem">
+            <div style="font-family:var(--serif);font-size:1.8rem;color:var(--red)">Hold</div>
+            <div style="font-size:0.76rem;color:var(--text-2)">Blocked by scanner shortcut and cross-site stability failure. 3 sign-offs pending.</div>
+          </div>
+          <div class="kpi-row" style="grid-template-columns: repeat(3,1fr);">
+            <div class="kpi-card"><div class="kpi-num warn">3</div><div class="kpi-label">Pending sign-offs</div></div>
+            <div class="kpi-card"><div class="kpi-num danger">2</div><div class="kpi-label">Open blockers</div></div>
+            <div class="kpi-card"><div class="kpi-num" style="color:var(--teal)">V1</div><div class="kpi-label">Evidence pack version</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Sign-off matrix</div>
+          <div class="signoff-list">
+            <div class="signoff-row"><div><div class="signoff-role">ML Lead</div><div class="signoff-note">Needs replay data on remediation branch before sign-off.</div></div><span class="badge b-amber">pending</span></div>
+            <div class="signoff-row"><div><div class="signoff-role">Validation / QA</div><div class="signoff-note">Requires site-specific limitation statement before committee review.</div></div><span class="badge b-amber">pending</span></div>
+            <div class="signoff-row"><div><div class="signoff-role">Regulatory partner</div><div class="signoff-note">Method appendix acceptable. Decision depends on final remediation wording.</div></div><span class="badge b-amber">review</span></div>
+            <div class="signoff-row"><div><div class="signoff-role">Founder / Product owner</div><div class="signoff-note">Executive summary drafted. Ready to finalise once blockers resolve.</div></div><span class="badge b-green">ready</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Open actions before release</div>
+        <div class="action-item"><div class="action-dot red"></div><div class="action-text"><strong style="color:var(--cream)">Complete replay on remediation branch</strong> &mdash; verify site-holdout delta improves after stain normalisation.</div></div>
+        <div class="action-item"><div class="action-dot red"></div><div class="action-text"><strong style="color:var(--cream)">Draft site-specific limitation statement</strong> &mdash; QA requires bounded limitation text for external sites.</div></div>
+        <div class="action-item"><div class="action-dot amber"></div><div class="action-text"><strong style="color:var(--cream)">Update executive summary</strong> &mdash; reflect final remediation status and limitation wording.</div></div>
+        <div class="action-item"><div class="action-dot green"></div><div class="action-text"><strong style="color:var(--cream)">Method appendix finalised</strong> &mdash; regulatory partner confirmed methodology documentation is acceptable.</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+function goDemo(e) {
+  if(e) e.preventDefault();
+  document.body.classList.add('show-demo');
+  window.scrollTo(0,0);
+}
+function goLanding() {
+  document.body.classList.remove('show-demo');
+  window.scrollTo(0,0);
+}
+
+function showScreen(name, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.demo-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if(el) el.classList.add('active');
+  const labels = { overview:'Overview', atlas:'Feature Atlas', causal:'Causal Validation', stress:'Stress Tests', compliance:'Compliance Map', evidence:'Evidence Report', signoff:'Release Gate' };
+  document.getElementById('bc-current').textContent = labels[name] || name;
+}
+
+function setFilter(btn) {
+  document.querySelectorAll('.atlas-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

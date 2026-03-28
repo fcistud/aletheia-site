@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aletheia — Experiment Results: Phikon-v2 Interpretability Audit</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #070B12; --ink-2: #0C1220; --ink-3: #111827; --surface: #151C2C;
+  --teal: #00D4C8; --teal-dim: rgba(0,212,200,0.10); --teal-border: rgba(0,212,200,0.20);
+  --cream: #E8E2D6; --white: #F5F2EC;
+  --text-1: rgba(232,226,214,0.92); --text-2: rgba(232,226,214,0.55); --text-3: rgba(232,226,214,0.30);
+  --border: rgba(232,226,214,0.08); --border-2: rgba(232,226,214,0.04);
+  --red: #EF4444; --red-dim: rgba(239,68,68,0.12);
+  --amber: #F59E0B; --amber-dim: rgba(245,158,11,0.12);
+  --green: #10B981; --green-dim: rgba(16,185,129,0.10);
+  --blue: #3B82F6; --blue-dim: rgba(59,130,246,0.12);
+  --serif: 'Fraunces', 'Georgia', serif;
+  --sans: 'DM Sans', -apple-system, system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink); color: var(--cream); font-family: var(--sans);
+  font-weight: 300; line-height: 1.7; -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(0,212,200,0.25); color: var(--white); }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.doc { max-width: 900px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+/* Header */
+.doc-header {
+  padding: 2rem 0 3rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.doc-brand { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
+.doc-brand-name { font-family: var(--serif); font-size: 1.1rem; font-weight: 500; color: var(--white); letter-spacing: 0.02em; }
+.doc-title { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 300; color: var(--white); line-height: 1.2; margin-bottom: 0.6rem; }
+.doc-title em { font-style: italic; color: var(--teal); font-weight: 400; }
+.doc-subtitle { font-size: 0.9rem; color: var(--text-2); max-width: 600px; line-height: 1.7; }
+.doc-meta { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.doc-meta-item { font-size: 0.7rem; }
+.doc-meta-label { color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--mono); font-size: 0.58rem; margin-bottom: 0.15rem; }
+.doc-meta-val { color: var(--cream); font-family: var(--mono); }
+
+/* Sections */
+.doc-section { margin-bottom: 3.5rem; }
+.sec-label {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.sec-label::before { content: ''; width: 20px; height: 1px; background: var(--teal); }
+.sec-title {
+  font-family: var(--serif); font-size: 1.5rem; font-weight: 300;
+  color: var(--white); line-height: 1.2; margin-bottom: 0.8rem;
+}
+.sec-title em { font-style: italic; color: var(--teal); font-weight: 400; }
+.sec-body { font-size: 0.9rem; color: var(--text-2); line-height: 1.8; margin-bottom: 1.5rem; }
+
+/* Cards and panels */
+.card {
+  background: var(--ink-2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1.4rem; margin-bottom: 1rem;
+}
+.card-title { font-size: 0.65rem; color: var(--teal); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.8rem; }
+
+/* KPI row */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 1.5rem; }
+.kpi-card { background: var(--ink-2); padding: 1.2rem 1.4rem; }
+.kpi-num { font-family: var(--serif); font-size: 2rem; line-height: 1; margin-bottom: 0.2rem; }
+.kpi-label { font-size: 0.65rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.kpi-note { font-size: 0.68rem; color: var(--text-2); margin-top: 0.2rem; }
+
+/* Ablation bars */
+.ablation-row { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--border-2); }
+.ablation-row:last-child { border: none; }
+.ablation-label { font-size: 0.82rem; color: var(--cream); min-width: 240px; font-weight: 400; }
+.ablation-bar-bg { flex: 1; height: 8px; background: var(--surface); border-radius: 100px; overflow: hidden; position: relative; }
+.ablation-bar { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+.ablation-val { font-family: var(--mono); font-size: 0.82rem; min-width: 52px; text-align: right; font-weight: 500; }
+
+/* Two col */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+/* Metric rows */
+.metric-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border-2); font-size: 0.82rem; }
+.metric-row:last-child { border: none; }
+.metric-label { color: var(--text-2); }
+.metric-val { font-family: var(--mono); font-weight: 500; }
+
+/* Badge */
+.badge { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 3px; font-size: 0.62rem; font-family: var(--mono); }
+.b-red { background: var(--red-dim); color: #F87171; }
+.b-green { background: var(--green-dim); color: var(--teal); }
+.b-amber { background: var(--amber-dim); color: #FCD34D; }
+
+/* Callout */
+.callout {
+  padding: 1rem 1.2rem; border-radius: 6px; border-left: 3px solid;
+  margin: 1.5rem 0; font-size: 0.85rem; line-height: 1.7;
+}
+.callout-finding { background: rgba(0,212,200,0.04); border-color: var(--teal); color: var(--text-2); }
+.callout-finding strong { color: var(--teal); font-weight: 500; }
+.callout-warn { background: rgba(245,158,11,0.04); border-color: var(--amber); color: var(--text-2); }
+.callout-warn strong { color: var(--amber); font-weight: 500; }
+
+/* Evidence list */
+.ev-item { display: flex; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--border-2); align-items: flex-start; }
+.ev-item:last-child { border: none; }
+.ev-num { font-family: var(--mono); font-size: 0.65rem; color: var(--teal); min-width: 40px; padding-top: 2px; }
+.ev-body { font-size: 0.82rem; color: var(--text-2); line-height: 1.6; }
+.ev-body strong { color: var(--cream); font-weight: 500; }
+
+/* Footer */
+.doc-footer {
+  border-top: 1px solid var(--border); padding-top: 2rem; margin-top: 4rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.doc-footer-brand { display: flex; align-items: center; gap: 0.5rem; }
+.doc-footer-text { font-family: var(--serif); font-size: 0.9rem; color: var(--text-3); }
+.doc-footer-note { font-size: 0.7rem; color: var(--text-3); }
+
+@media (max-width: 700px) {
+  .doc { padding: 2rem 1.2rem 4rem; }
+  .two-col { grid-template-columns: 1fr; }
+  .ablation-label { min-width: 160px; font-size: 0.75rem; }
+  .doc-meta { flex-direction: column; gap: 0.8rem; }
+}
+
+/* Figure styles */
+.fig-block { margin: 2rem 0; }
+.fig-img { width: 100%; border-radius: 6px; border: 1px solid var(--border); }
+.fig-caption { font-size: 0.72rem; color: var(--text-3); margin-top: 0.5rem; line-height: 1.5; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <!-- HEADER -->
+  <div class="doc-header">
+    <div>
+      <div class="doc-brand">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px"><rect width="32" height="32" rx="7" fill="url(#rlg2)"/><path d="M16 6L8 24h3.2l2-4.8h5.6L20.8 24H24L16 6zm0 5.6L19 19.2h-6L16 11.6z" fill="#070B12" fill-opacity="0.9"/><defs><linearGradient id="rlg2" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00D4C8"/><stop offset="1" stop-color="#00A89E"/></linearGradient></defs></svg>
+        <span class="doc-brand-name">Aletheia</span>
+      </div>
+      <div class="doc-title">Mechanistic Interpretability Audit<br><em>Phikon-v2 &middot; NCT-CRC-HE</em></div>
+      <div class="doc-subtitle">Sparse autoencoder analysis of a pathology foundation model. 4,096 features extracted from 9,999 colorectal histology patches across 9 tissue classes. Completed experiment with ablation validation and cross-style stability analysis.</div>
+      <div class="doc-meta">
+        <div class="doc-meta-item"><div class="doc-meta-label">Model</div><div class="doc-meta-val">Phikon-v2 (Owkin)</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-label">Dataset</div><div class="doc-meta-val">NCT-CRC-HE (non-normalized)</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-label">Patches</div><div class="doc-meta-val">9,999</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-label">Date</div><div class="doc-meta-val">March 2026</div></div>
+        <div class="doc-meta-item"><div class="doc-meta-label">Status</div><div class="doc-meta-val" style="color:var(--teal)">Complete</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. EXPERIMENT OVERVIEW -->
+  <div class="doc-section">
+    <div class="sec-label">Experiment overview</div>
+    <div class="sec-title">What the model learned &mdash; and <em>what it shouldn&rsquo;t have.</em></div>
+    <div class="sec-body">
+      A sparse autoencoder trained on the final CLS representations of Phikon-v2 decomposed each 1,024-dimensional embedding into a sparse combination of 4,096 features. Each feature corresponds to a single concept the model has encoded during pre-training. We classified every feature by its correlation with tissue type (biological signal) versus staining properties (preparation artifact).
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-num" style="color:var(--white)">4,096</div><div class="kpi-label">Sparse features</div><div class="kpi-note">SAE dictionary size</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:var(--teal)">410</div><div class="kpi-label">Biology features</div><div class="kpi-note">Tissue-linked, clean</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:var(--amber)">1,674</div><div class="kpi-label">Artifact-sensitive</div><div class="kpi-note">Stain/color-correlated</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:var(--white)">9</div><div class="kpi-label">Tissue classes</div><div class="kpi-note">Colorectal histology</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="color:var(--white)">79</div><div class="kpi-label">Matched pairs</div><div class="kpi-note">Used in ablation</div></div>
+    </div>
+  </div>
+
+  <!-- 2. DUAL PATHWAY FINDING -->
+  <div class="doc-section">
+    <div class="sec-label">Core finding</div>
+    <div class="sec-title">Two classification pathways, <em>one metric.</em></div>
+    <div class="sec-body">
+      The model contains two parallel pathways for tissue classification. One is grounded in morphology &mdash; gland architecture, cell shape, stromal density. The other encodes tissue type through staining intensity and color properties that are specific to the preparation protocol used in the training dataset. Standard accuracy metrics conflate both pathways. The morphology pathway is robust; the staining pathway is brittle.
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Clean biology features</div>
+        <div class="metric-row"><span class="metric-label">Features identified</span><span class="metric-val" style="color:var(--teal)">410</span></div>
+        <div class="metric-row"><span class="metric-label">High tissue specificity</span><span class="metric-val" style="color:var(--teal)">&check;</span></div>
+        <div class="metric-row"><span class="metric-label">Low color correlation</span><span class="metric-val" style="color:var(--teal)">&check;</span></div>
+        <div class="metric-row"><span class="metric-label">Cross-style stability (|d|)</span><span class="metric-val" style="color:var(--teal)">0.21</span></div>
+        <div class="metric-row"><span class="metric-label">Biology-only probe accuracy</span><span class="metric-val" style="color:var(--teal)">97.0%</span></div>
+        <div style="margin-top:0.8rem;font-size:0.78rem;color:var(--text-2);line-height:1.6">Top features: goblet cell density, crypt architecture, smooth muscle morphology, stromal pattern, tumour nest boundary. Consistent with established histological grading criteria.</div>
+      </div>
+    </div>
+    <div class="fig-block">
+      <img class="fig-img" src="assets/figures/clinical_biology.png" alt="Clinical biology features — top-activating patches for SAE features linked to tissue morphology">
+      <div class="fig-caption">Figure 1 — Top-activating patches for SAE features classified as biological signal. Each row corresponds to a single sparse feature. Patches are sorted by activation strength. Tissue types (NORM, MUS, LYM) cluster within features, confirming tissue-specific encoding.</div>
+    </div>
+      <div class="card">
+        <div class="card-title">Artifact-sensitive features</div>
+        <div class="metric-row"><span class="metric-label">Features identified</span><span class="metric-val" style="color:var(--amber)">1,674</span></div>
+        <div class="metric-row"><span class="metric-label">Mixed tissue types</span><span class="metric-val" style="color:var(--amber)">&starf;</span></div>
+        <div class="metric-row"><span class="metric-label">High color correlation</span><span class="metric-val" style="color:var(--amber)">&starf;</span></div>
+        <div class="metric-row"><span class="metric-label">Cross-style stability (|d|)</span><span class="metric-val" style="color:var(--red)">0.78</span></div>
+        <div class="metric-row"><span class="metric-label">Artifact-only probe accuracy</span><span class="metric-val" style="color:var(--amber)">91.2%</span></div>
+        <div style="margin-top:0.8rem;font-size:0.78rem;color:var(--text-2);line-height:1.6">These features confound tissue types with staining darkness. Within one lab, the correlation holds. Across labs with different protocols, it breaks. The model has learned to associate color intensity with tissue classification.</div>
+      </div>
+    </div>
+    <div class="fig-block">
+      <img class="fig-img" src="assets/figures/artifact_sensitive.png" alt="Artifact-sensitive features — top-activating patches with strong stain and colour correlation">
+      <div class="fig-caption">Figure 2 — Top-activating patches for artifact-sensitive features. Mixed tissue types within each feature (MUC, NORM, TUM) indicate the feature encodes appearance rather than morphology. Strong colour correlation visible across rows.</div>
+    </div>
+    </div>
+    <div class="callout callout-finding">
+      <strong>Key insight:</strong> The artifact-sensitive features are not noise. They carry real tissue information &mdash; but through the wrong channel. They encode tissue type via appearance properties that are protocol-specific. Standard evaluation cannot separate these pathways. SAE-based decomposition can.
+    </div>
+  </div>
+
+  <!-- 3. ABLATION STUDY -->
+  <div class="doc-section">
+    <div class="sec-label">Ablation study</div>
+    <div class="sec-title">Causal validation: <em>which features does the model depend on?</em></div>
+    <div class="sec-body">
+      Matched sets of 79 clean biology features and 79 artifact-sensitive features were tested via ablation. Each feature set was either isolated (used alone) or removed (zeroed out) while measuring downstream classification accuracy. This establishes causal dependency &mdash; not just correlation.
+    </div>
+    <div class="card">
+      <div class="card-title">Ablation results &mdash; 79 matched features per condition</div>
+      <div class="ablation-row">
+        <div class="ablation-label">Combined baseline (all selected)</div>
+        <div class="ablation-bar-bg"><div class="ablation-bar" style="width:97.8%;background:var(--teal)"></div></div>
+        <div class="ablation-val" style="color:var(--teal)">97.8%</div>
+      </div>
+      <div class="ablation-row">
+        <div class="ablation-label">Biology-only probe</div>
+        <div class="ablation-bar-bg"><div class="ablation-bar" style="width:97.0%;background:var(--teal)"></div></div>
+        <div class="ablation-val" style="color:var(--teal)">97.0%</div>
+      </div>
+      <div class="ablation-row">
+        <div class="ablation-label">Artifact-only probe</div>
+        <div class="ablation-bar-bg"><div class="ablation-bar" style="width:91.2%;background:var(--amber)"></div></div>
+        <div class="ablation-val" style="color:var(--amber)">91.2%</div>
+      </div>
+      <div class="ablation-row">
+        <div class="ablation-label">Remove artifact features</div>
+        <div class="ablation-bar-bg"><div class="ablation-bar" style="width:87.9%;background:var(--amber)"></div></div>
+        <div class="ablation-val" style="color:var(--amber)">87.9%</div>
+      </div>
+      <div class="ablation-row">
+        <div class="ablation-label" style="color:var(--red)">Remove biology features</div>
+        <div class="ablation-bar-bg"><div class="ablation-bar" style="width:48.1%;background:var(--red)"></div></div>
+        <div class="ablation-val" style="color:var(--red)">48.1%</div>
+      </div>
+    </div>
+    <div class="fig-block">
+      <img class="fig-img" src="assets/figures/ablation_summary.png" alt="Ablation study bar chart showing probe accuracy under each feature-set condition">
+      <div class="fig-caption">Figure 3 — Ablation study results. Combined baseline (97.8%) nearly matches biology-only (97.0%). Removing biology features collapses accuracy to 48.1%, confirming causal dependence on morphological signal.</div>
+    </div>
+    <div class="callout callout-finding">
+      <strong>Reading these results:</strong> The biology features are sufficient &mdash; 97.0% accuracy from 79 features alone, nearly matching the full baseline. Removing them collapses the model to 48.1%. The artifact features are not noise &mdash; 91.2% accuracy alone is substantial &mdash; but they encode tissue type through protocol-specific appearance, not morphology. The model partially relies on both pathways.
+    </div>
+  </div>
+
+  <!-- 4. REPRESENTATION-LEVEL FOLLOW-UP -->
+  <div class="doc-section">
+    <div class="sec-label">Representation-level validation</div>
+    <div class="sec-title">Activation patching at the <em>embedding level.</em></div>
+    <div class="sec-body">
+      To confirm the ablation findings hold at the representation level (not just downstream probe level), we ran activation patching on the final normalised CLS representation before the embedding-level probe.
+    </div>
+    <div class="card">
+      <div class="card-title">SAE reconstruction accuracy under patching</div>
+      <div class="metric-row"><span class="metric-label">SAE reconstruction baseline</span><span class="metric-val" style="color:var(--teal)">99.25%</span></div>
+      <div class="metric-row"><span class="metric-label">Patched biology set</span><span class="metric-val" style="color:var(--teal)">99.10%</span></div>
+      <div class="metric-row"><span class="metric-label">Patched artifact-sensitive set</span><span class="metric-val" style="color:var(--teal)">99.30%</span></div>
+      <div class="metric-row"><span class="metric-label">Patched random set (control)</span><span class="metric-val" style="color:var(--text-2)">99.20%</span></div>
+    </div>
+    <div style="font-size:0.82rem;color:var(--text-2);line-height:1.7;margin-top:0.8rem">
+      <div class="fig-block">
+      <img class="fig-img" src="assets/figures/activation_patching.png" alt="Activation patching results on the final Phikon-v2 representation">
+      <div class="fig-caption">Figure 4 — Activation patching on the final Phikon-v2 CLS representation. All conditions maintain probe accuracy above 99.0%, confirming SAE decomposition fidelity is not the source of observed ablation effects.</div>
+    </div>
+    All patching conditions maintain reconstruction fidelity within 0.15% of baseline, confirming that the SAE decomposition is stable and that downstream effects are attributable to feature-level semantics rather than reconstruction artifacts.
+    </div>
+  </div>
+
+  <!-- 5. CROSS-STYLE STABILITY -->
+  <div class="doc-section">
+    <div class="sec-label">Cross-style stability</div>
+    <div class="sec-title">Biology features are stable. <em>Artifact features are not.</em></div>
+    <div class="sec-body">
+      We measured feature activation stability between two apparent preparation clusters in the dataset (n = 5,160 vs n = 4,839) using Cohen&rsquo;s d effect size. These clusters are not verified institution labels, but they correlate with visible staining differences.
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Clean biology features</div>
+        <div style="text-align:center;padding:1rem 0">
+          <div style="font-family:var(--serif);font-size:2.5rem;color:var(--teal);line-height:1">0.21</div>
+          <div style="font-size:0.68rem;color:var(--text-3);margin-top:0.3rem">Median |Cohen&rsquo;s d| across styles</div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-2);line-height:1.6">
+          Small effect size. Biology features activate consistently regardless of staining variation. These are the features you want a model to rely on.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Artifact-sensitive features</div>
+        <div style="text-align:center;padding:1rem 0">
+          <div style="font-family:var(--serif);font-size:2.5rem;color:var(--red);line-height:1">0.78</div>
+          <div style="font-size:0.68rem;color:var(--text-3);margin-top:0.3rem">Median |Cohen&rsquo;s d| across styles</div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-2);line-height:1.6">
+          Large effect size. Artifact-sensitive features shift substantially between preparation styles. A model relying on these features will degrade when deployed to a new lab.
+        </div>
+      </div>
+    </div>
+    <div class="fig-block">
+      <img class="fig-img" src="assets/figures/cross_site_stability.png" alt="Cross-site stability analysis showing Cohen d effect sizes and cluster scatter plots">
+      <div class="fig-caption">Figure 5 — Cross-style stability analysis. Left: Biology features show low effect size (median |d| = 0.21) vs artifact features (median |d| = 0.78). Centre and right: scatter plots of mean activation per feature across inferred preparation clusters.</div>
+    </div>
+    <div class="callout callout-warn">
+      <strong>Deployment implication:</strong> A model that partially relies on stain-sensitive features (as this one does &mdash; 91.2% accuracy from artifact features alone) is vulnerable to silent performance degradation when tissue processing protocols change. This is the exact failure mode that cross-site validation audits exist to catch.
+    </div>
+  </div>
+
+  <!-- 6. WHAT THIS MEANS -->
+  <div class="doc-section">
+    <div class="sec-label">Interpretation</div>
+    <div class="sec-title">Two pathways, <em>one honest read.</em></div>
+    <div class="sec-body">
+      The strongest honest interpretation is that the model contains two usable pathways at once: a morphology-dominant pathway that remains highly predictive on its own, and a stain-sensitive pathway that still carries substantial label information. The morphology pathway is sufficient (97.0%). The staining pathway is not negligible (91.2%). Standard metrics cannot distinguish between them.
+    </div>
+    <div class="fig-block">
+      <img class="fig-img" src="assets/figures/evidence_montage.png" alt="Evidence pack montage — structured audit report pages">
+      <div class="fig-caption">Figure 6 — Evidence pack overview. Structured report pages covering executive summary, feature atlas, confounder detection, regulatory mapping, and methodology documentation.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Evidence pack summary</div>
+      <div class="ev-item"><div class="ev-num">EP-01</div><div class="ev-body"><strong>Feature atlas:</strong> 4,096 sparse features extracted, 410 classified as tissue-linked biological signal, 1,674 as artifact-sensitive.</div></div>
+      <div class="ev-item"><div class="ev-num">EP-02</div><div class="ev-body"><strong>Ablation validation:</strong> Biology features are both necessary (removal &rarr; 48.1%) and sufficient (isolation &rarr; 97.0%). Artifact features carry real label information (91.2%) but via preparation-correlated channels.</div></div>
+      <div class="ev-item"><div class="ev-num">EP-03</div><div class="ev-body"><strong>Cross-style stability:</strong> Biology features stable across preparation variants (|d| = 0.21). Artifact features shift substantially (|d| = 0.78).</div></div>
+      <div class="ev-item"><div class="ev-num">EP-04</div><div class="ev-body"><strong>Representation fidelity:</strong> SAE reconstruction maintains 99.1&ndash;99.3% accuracy under all patching conditions, confirming decomposition validity.</div></div>
+    </div>
+    <div style="font-size:0.85rem;color:var(--text-2);line-height:1.8;margin-top:1.5rem">
+      Aletheia&rsquo;s purpose is not to pretend the shortcut pathway is the whole model. It is to make that mixed reliance visible, testable, and reviewable &mdash; so that deployment decisions are made with full knowledge of where the model&rsquo;s accuracy comes from.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="doc-footer">
+    <div class="doc-footer-brand">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px"><rect width="32" height="32" rx="7" fill="url(#rlg2)"/><path d="M16 6L8 24h3.2l2-4.8h5.6L20.8 24H24L16 6zm0 5.6L19 19.2h-6L16 11.6z" fill="#070B12" fill-opacity="0.9"/><defs><linearGradient id="rlg2" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#00D4C8"/><stop offset="1" stop-color="#00A89E"/></linearGradient></defs></svg>
+      <span class="doc-footer-text">Aletheia</span>
+    </div>
+    <div class="doc-footer-note">London, UK &middot; UCL Hatchery</div>
+  </div>
+
+</div>
+
+</body>
+</html>
