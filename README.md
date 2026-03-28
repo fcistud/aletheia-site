@@ -6,8 +6,8 @@ Assurance infrastructure for clinical AI. We open up foundation model internals 
 
 | Page | Description |
 |------|-------------|
-| [**Aletheia — Platform & Vision**](https://fcistud.github.io/aletheia/) | Landing page and interactive platform demo |
-| [**Aletheia — Experiment Results**](https://fcistud.github.io/aletheia/results.html) | Phikon-v2 / NCT-CRC-HE interpretability audit with actual experiment data |
+| [**Aletheia — Platform & Vision**](https://fcistud.github.io/aletheia-site/) | Landing page and interactive platform demo |
+| [**Aletheia — Experiment Results**](https://fcistud.github.io/aletheia-site/results.html) | Phikon-v2 / NCT-CRC-HE interpretability audit with actual experiment data |
 
 ## What's Here
 
