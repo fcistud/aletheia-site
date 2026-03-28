@@ -6,14 +6,23 @@ Assurance infrastructure for clinical AI. We open up foundation model internals 
 
 | Page | Description |
 |------|-------------|
-| [**Aletheia — Platform & Vision**](https://fcistud.github.io/aletheia-site/) | Landing page and interactive platform demo |
-| [**Aletheia — Experiment Results**](https://fcistud.github.io/aletheia-site/results.html) | Phikon-v2 / NCT-CRC-HE interpretability audit with actual experiment data |
+| [**Platform Demo**](https://fcistud.github.io/aletheia-site/#demo) | Interactive platform demo — audit dashboard, feature atlas, causal validation, compliance map |
+| [**Experiment Results**](https://fcistud.github.io/aletheia-site/results.html) | Phikon-v2 / NCT-CRC-HE interpretability audit with actual experiment data and figures |
+| [**Landing Page**](https://fcistud.github.io/aletheia-site/) | Product landing page with problem statement, workflow, and regulatory context |
+
+## Notebooks
+
+| Notebook | Description |
+|----------|-------------|
+| [Aletheia_Experiment_Findings.ipynb](notebooks/Aletheia_Experiment_Findings.ipynb) | Full experiment notebook — SAE training, feature classification, ablation study, cross-style stability analysis |
 
 ## What's Here
 
 ```
-index.html                     # Vision build — landing page + interactive demo
-results.html                   # Real build — Phikon-v2 experiment evidence
+index.html                     # Landing page + interactive platform demo
+results.html                   # Experiment results with figures
+notebooks/
+  └── Aletheia_Experiment_Findings.ipynb
 assets/figures/
   ├── clinical_biology.png     # SAE features detecting tissue morphology
   ├── artifact_sensitive.png   # Artifact-sensitive features with stain correlation
@@ -37,4 +46,4 @@ Sparse autoencoder analysis of **Phikon-v2** (Owkin) on **NCT-CRC-HE** (9,999 co
 
 ## Built With
 
-Static HTML, vanilla CSS, vanilla JS. No frameworks, no build step. Open any `.html` file in a browser.
+Static HTML, vanilla CSS, vanilla JS. No frameworks, no build step.

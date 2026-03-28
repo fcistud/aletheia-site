@@ -134,9 +134,19 @@ body {
 }
 
 /* Figure styles */
-.fig-block { margin: 2rem 0; }
-.fig-img { width: 100%; border-radius: 6px; border: 1px solid var(--border); }
-.fig-caption { font-size: 0.72rem; color: var(--text-3); margin-top: 0.5rem; line-height: 1.5; font-style: italic; }
+.fig-block { margin: 2rem 0; text-align: center; }
+.fig-img {
+  max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03); padding: 0.5rem;
+}
+.fig-img-sm { max-width: 540px; }
+.fig-img-md { max-width: 720px; }
+.fig-img-lg { max-width: 100%; }
+.fig-caption {
+  font-size: 0.68rem; color: var(--text-3); margin-top: 0.6rem;
+  line-height: 1.5; font-style: italic; text-align: left;
+  max-width: 720px; margin-left: auto; margin-right: auto;
+}
 </style>
 </head>
 <body>
@@ -197,7 +207,7 @@ body {
       </div>
     </div>
     <div class="fig-block">
-      <img class="fig-img" src="assets/figures/clinical_biology.png" alt="Clinical biology features — top-activating patches for SAE features linked to tissue morphology">
+      <img class="fig-img fig-img-md" src="assets/figures/clinical_biology.png" alt="Clinical biology features — top-activating patches for SAE features linked to tissue morphology">
       <div class="fig-caption">Figure 1 — Top-activating patches for SAE features classified as biological signal. Each row corresponds to a single sparse feature. Patches are sorted by activation strength. Tissue types (NORM, MUS, LYM) cluster within features, confirming tissue-specific encoding.</div>
     </div>
       <div class="card">
@@ -211,7 +221,7 @@ body {
       </div>
     </div>
     <div class="fig-block">
-      <img class="fig-img" src="assets/figures/artifact_sensitive.png" alt="Artifact-sensitive features — top-activating patches with strong stain and colour correlation">
+      <img class="fig-img fig-img-md" src="assets/figures/artifact_sensitive.png" alt="Artifact-sensitive features — top-activating patches with strong stain and colour correlation">
       <div class="fig-caption">Figure 2 — Top-activating patches for artifact-sensitive features. Mixed tissue types within each feature (MUC, NORM, TUM) indicate the feature encodes appearance rather than morphology. Strong colour correlation visible across rows.</div>
     </div>
     </div>
@@ -256,7 +266,7 @@ body {
       </div>
     </div>
     <div class="fig-block">
-      <img class="fig-img" src="assets/figures/ablation_summary.png" alt="Ablation study bar chart showing probe accuracy under each feature-set condition">
+      <img class="fig-img fig-img-sm" src="assets/figures/ablation_summary.png" alt="Ablation study bar chart showing probe accuracy under each feature-set condition">
       <div class="fig-caption">Figure 3 — Ablation study results. Combined baseline (97.8%) nearly matches biology-only (97.0%). Removing biology features collapses accuracy to 48.1%, confirming causal dependence on morphological signal.</div>
     </div>
     <div class="callout callout-finding">
@@ -280,7 +290,7 @@ body {
     </div>
     <div style="font-size:0.82rem;color:var(--text-2);line-height:1.7;margin-top:0.8rem">
       <div class="fig-block">
-      <img class="fig-img" src="assets/figures/activation_patching.png" alt="Activation patching results on the final Phikon-v2 representation">
+      <img class="fig-img fig-img-sm" src="assets/figures/activation_patching.png" alt="Activation patching results on the final Phikon-v2 representation">
       <div class="fig-caption">Figure 4 — Activation patching on the final Phikon-v2 CLS representation. All conditions maintain probe accuracy above 99.0%, confirming SAE decomposition fidelity is not the source of observed ablation effects.</div>
     </div>
     All patching conditions maintain reconstruction fidelity within 0.15% of baseline, confirming that the SAE decomposition is stable and that downstream effects are attributable to feature-level semantics rather than reconstruction artifacts.
@@ -317,7 +327,7 @@ body {
       </div>
     </div>
     <div class="fig-block">
-      <img class="fig-img" src="assets/figures/cross_site_stability.png" alt="Cross-site stability analysis showing Cohen d effect sizes and cluster scatter plots">
+      <img class="fig-img fig-img-md" src="assets/figures/cross_site_stability.png" alt="Cross-site stability analysis showing Cohen d effect sizes and cluster scatter plots">
       <div class="fig-caption">Figure 5 — Cross-style stability analysis. Left: Biology features show low effect size (median |d| = 0.21) vs artifact features (median |d| = 0.78). Centre and right: scatter plots of mean activation per feature across inferred preparation clusters.</div>
     </div>
     <div class="callout callout-warn">
@@ -333,7 +343,7 @@ body {
       The strongest honest interpretation is that the model contains two usable pathways at once: a morphology-dominant pathway that remains highly predictive on its own, and a stain-sensitive pathway that still carries substantial label information. The morphology pathway is sufficient (97.0%). The staining pathway is not negligible (91.2%). Standard metrics cannot distinguish between them.
     </div>
     <div class="fig-block">
-      <img class="fig-img" src="assets/figures/evidence_montage.png" alt="Evidence pack montage — structured audit report pages">
+      <img class="fig-img fig-img-sm" src="assets/figures/evidence_montage.png" alt="Evidence pack montage — structured audit report pages">
       <div class="fig-caption">Figure 6 — Evidence pack overview. Structured report pages covering executive summary, feature atlas, confounder detection, regulatory mapping, and methodology documentation.</div>
     </div>
     <div class="card">

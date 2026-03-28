@@ -1171,6 +1171,17 @@ const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.15 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Auto-open demo if URL hash is #demo
+if (window.location.hash === '#demo') {
+  document.body.classList.add('show-demo');
+}
+window.addEventListener('hashchange', function() {
+  if (window.location.hash === '#demo') {
+    document.body.classList.add('show-demo');
+    window.scrollTo(0,0);
+  }
+});
 </script>
 
 </body>
