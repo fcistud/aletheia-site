@@ -230,7 +230,7 @@
 <p>These are the clean biology features: high tissue-type specificity, low correlation with staining properties. Each row shows the eight most-activating patches for a single SAE feature.</p>
 
 <figure class="medium">
-  <img src="clinical_biology.png" alt="Clinical biology features">
+  <img src="images/clinical_biology.png" alt="Clinical biology features">
   <figcaption>SAE features detecting clinically relevant tissue morphology. Top rows: normal colon mucosa (gland architecture, goblet cells, crypt structure). Middle rows: smooth muscle (fibre patterns, elongated nuclei). Bottom rows: lymphocytes (dense immune cell infiltration). These features correspond to concepts a pathologist would recognise.</figcaption>
 </figure>
 
@@ -243,7 +243,7 @@
 <p>These features tell a different story. They correlate strongly with image-level colour and staining properties rather than tissue morphology.</p>
 
 <figure class="medium">
-  <img src="artifact_sensitive.png" alt="Artifact-sensitive features">
+  <img src="images/artifact_sensitive.png" alt="Artifact-sensitive features">
   <figcaption>SAE features with strong staining/colour correlation. Note the mixed tissue types within each row: tumour, lymphocytes, mucosa, muscle all appear together. What they share is staining intensity, not morphology. These features encode tissue identity through appearance shortcuts.</figcaption>
 </figure>
 
@@ -256,7 +256,7 @@
 <p>Finding features and labelling them is not enough. The question is whether the model <em>actually depends</em> on them. The ablation study answers this by zeroing out matched sets of 79 clean biology features and 79 artifact-sensitive features, then measuring the impact on a tissue classification probe.</p>
 
 <figure class="small">
-  <img src="ablation_summary.png" alt="Ablation study results">
+  <img src="images/ablation_summary.png" alt="Ablation study results">
   <figcaption>Matched ablation: 79 biology features vs 79 artifact features. Combined baseline: 97.8%. Biology-only: 97.0%. Artifact-only: 91.2%. Zero biology: 48.1%. Zero artifact: 87.9%.</figcaption>
 </figure>
 
@@ -279,7 +279,7 @@
 <p>The ablation study operates at the probe level: it measures how much a downstream classifier depends on each feature set. To confirm that the shortcut features are part of the model's learned representation (and not just a quirk of the probe), I ran a representation-level patching experiment. I zeroed feature families inside the SAE's reconstruction of the CLS embedding, then re-probed.</p>
 
 <figure class="small">
-  <img src="activation_patching.png" alt="Activation patching results">
+  <img src="images/activation_patching.png" alt="Activation patching results">
   <figcaption>Representation-level patching on the final Phikon-v2 CLS embedding. Raw: 99.12%. SAE reconstruction: 99.25%. Patch bio: 99.10% (-0.2 pts). Patch artifact: 99.30%. Patch random: 99.20%. The shortcut features are embedded in the representation itself, not an artefact of the probe.</figcaption>
 </figure>
 
@@ -290,7 +290,7 @@
 <p>I also clustered patches by inferred staining style (k-means on colour statistics) and measured how much each feature family's activation shifts across clusters.</p>
 
 <figure>
-  <img src="cross_site_stability.png" alt="Cross-site stability analysis">
+  <img src="images/cross_site_stability.png" alt="Cross-site stability analysis">
   <figcaption>Left: absolute Cohen's d across inferred staining clusters. Biology features: median 0.21. Artifact features: median 0.78, nearly 4x larger. Middle/right: per-feature mean activation across clusters. Biology features cluster near the diagonal (stable). Artifact features scatter widely (unstable across staining conditions).</figcaption>
 </figure>
 
@@ -321,10 +321,10 @@
   <div class="product-note-label">Where this is going: the Aletheia product</div>
   <p style="font-size:14.5px;margin-bottom:10px;">I'm packaging this verification workflow into a product that pathology AI companies can use for regulatory compliance. Below is the product prototype: an interactive assurance workspace showing the full audit workflow from feature atlas through causal validation to regulatory compliance mapping.</p>
   <figure style="margin:12px 0 0;border:none;">
-    <img src="aletheia_product_overview.png" alt="Aletheia product prototype - audit overview" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
+    <img src="images/aletheia_product_overview.png" alt="Aletheia product prototype - audit overview" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
   </figure>
   <figure style="margin:8px 0 0;border:none;">
-    <img src="aletheia_product_atlas.png" alt="Aletheia product prototype - feature atlas" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
+    <img src="images/aletheia_product_atlas.png" alt="Aletheia product prototype - feature atlas" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
   </figure>
   <p style="font-size:13.5px;color:#64748b;margin-top:10px;margin-bottom:0;">Under the EU AI Act, high-risk medical AI systems require interpretability evidence by August 2027. This is what that evidence workflow looks like: feature-level assurance with causal validation, mapped to Article 13, MHRA AIaMD, and FDA SaMD requirements.</p>
 </div>
