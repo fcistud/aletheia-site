@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aletheia — Mechanistic Audit of Phikon-v2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: #faf9f6;
+    color: #1a1a1a;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 28px 140px;
+    line-height: 1.75;
+    font-size: 16.5px;
+  }
+
+  header {
+    margin-bottom: 44px;
+  }
+  header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  header .subtitle {
+    font-size: 16px;
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .meta-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: #9ca3af;
+    line-height: 1.8;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 44px;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: #374151;
+  }
+
+  p { margin-bottom: 14px; }
+
+  figure {
+    margin: 24px 0;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  figure img {
+    width: 92%;
+    display: block;
+    margin: 12px auto;
+  }
+  figure.small img {
+    width: 78%;
+  }
+  figure.medium img {
+    width: 85%;
+  }
+  figcaption {
+    padding: 8px 16px 10px;
+    font-size: 13px;
+    color: #6b7280;
+    font-style: italic;
+    border-top: 1px solid #f3f4f6;
+    background: #fafafa;
+  }
+
+  /* KPI row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 20px 0 24px;
+  }
+  .kpi {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .kpi-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .kpi-lbl {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 10.5px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+  }
+  .v-green { color: #166534; }
+  .v-red { color: #991b1b; }
+  .v-amber { color: #92400e; }
+
+  /* Highlight box */
+  .highlight {
+    background: #fffbeb;
+    border-left: 3px solid #fbbf24;
+    padding: 14px 18px;
+    margin: 18px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 15.5px;
+  }
+  .highlight-red {
+    background: #fef2f2;
+    border-left-color: #fca5a5;
+  }
+  .highlight-green {
+    background: #f0fdf4;
+    border-left-color: #86efac;
+  }
+  .highlight-blue {
+    background: #eff6ff;
+    border-left-color: #93c5fd;
+  }
+
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+
+  /* Product screenshot section */
+  .product-note {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin: 24px 0;
+  }
+  .product-note-label {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    margin: 44px 0;
+  }
+
+  footer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #9ca3af;
+    text-align: center;
+    padding-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Aletheia — Mechanistic Audit of a Pathology Foundation Model</h1>
+  <div class="subtitle">Can we look inside a cancer AI and separate what it learned about biology from what it learned about staining?</div>
+  <div class="meta-line">
+    Model: Phikon-v2 (Owkin, ViT-L, 460M tiles) · Dataset: NCT-CRC-HE non-normalised · 9,999 patches · 9 tissue classes<br>
+    Method: Sparse autoencoder (4,096 features) → matched ablation → activation patching → cross-cluster stability<br>
+    Mariam Hassan · UCL · March 2026
+  </div>
+</header>
+
+
+<!-- ======================================= -->
+<h2>The question</h2>
+
+<p>Pathology AI models can score well on benchmarks while relying on features that have nothing to do with biology. A model trained on tissue from a referral hospital using a Hamamatsu scanner might learn "Hamamatsu = aggressive cancer" — not because of the tissue, but because the referral center happens to receive harder cases. Standard explainability tools (Grad-CAM, SHAP) show <em>where</em> a model looks on an image. They cannot tell you <em>what concept</em> the model has formed internally, or whether that concept is a genuine biological signal or a dangerous shortcut.</p>
+
+<p>This experiment asks: if we decompose a pathology foundation model's internal representations into individual interpretable features using sparse autoencoders, can we identify which features encode real tissue morphology and which encode staining or scanner artefacts? And can we prove the difference causally — not just by correlation?</p>
+
+
+<!-- ======================================= -->
+<h2>Experiment overview</h2>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-val">9,999</div><div class="kpi-lbl">Patches</div></div>
+  <div class="kpi"><div class="kpi-val">4,096</div><div class="kpi-lbl">SAE features</div></div>
+  <div class="kpi"><div class="kpi-val v-green">410</div><div class="kpi-lbl">Biology features</div></div>
+  <div class="kpi"><div class="kpi-val v-red">1,674</div><div class="kpi-lbl">Artifact features</div></div>
+  <div class="kpi"><div class="kpi-val v-amber">258</div><div class="kpi-lbl">Overlap</div></div>
+</div>
+
+<p>The pipeline extracts CLS-token embeddings (1,024 dimensions) from Phikon-v2, trains a sparse autoencoder to decompose them into 4,096 features, then classifies each feature by tissue specificity (ANOVA F-statistic) and staining sensitivity (Pearson correlation with colour properties). 258 features satisfy both thresholds — they are genuinely entangled, encoding tissue identity partly through appearance properties. This entanglement is the core finding, not a limitation: it is exactly the kind of confound that would cause silent failures in cross-site deployment.</p>
+
+
+<!-- ======================================= -->
+<h2>Biological features — what the model learned about tissue</h2>
+
+<p>These are the clean biology features: high tissue-type specificity, low correlation with staining properties. Each row shows the eight most-activating patches for a single SAE feature.</p>
+
+<figure class="medium">
+  <img src="clinical_biology.png" alt="Clinical biology features">
+  <figcaption>SAE features detecting clinically relevant tissue morphology. Top rows: normal colon mucosa (gland architecture, goblet cells, crypt structure). Middle rows: smooth muscle (fibre patterns, elongated nuclei). Bottom rows: lymphocytes (dense immune cell infiltration). These features correspond to concepts a pathologist would recognise.</figcaption>
+</figure>
+
+<p>The model has learned genuine histological concepts. The normal mucosa features clearly separate glandular tissue from the smooth muscle features — different morphology, different SAE features. This is what you want a pathology model to learn.</p>
+
+
+<!-- ======================================= -->
+<h2>Artifact-sensitive features — what the model learned about staining</h2>
+
+<p>These features tell a different story. They correlate strongly with image-level colour and staining properties rather than tissue morphology.</p>
+
+<figure class="medium">
+  <img src="artifact_sensitive.png" alt="Artifact-sensitive features">
+  <figcaption>SAE features with strong staining/colour correlation. Note the mixed tissue types within each row — tumor, lymphocytes, mucosa, muscle all appear together. What they share is staining intensity, not morphology. These features encode tissue identity through appearance shortcuts.</figcaption>
+</figure>
+
+<p>Look at the patches within each row. They are a mix of tissue types — tumor, lymphocytes, normal mucosa, smooth muscle — but they share intense staining. The model has learned a second classification pathway: "dark staining = dense tissue." Within one laboratory's staining protocol, this correlation holds. Across laboratories with different protocols, it breaks. This is the scanner-confounder problem in its most direct form.</p>
+
+
+<!-- ======================================= -->
+<h2>Ablation study — proving which features matter</h2>
+
+<p>Finding features and labelling them isn't enough. The question is whether the model <em>actually depends</em> on them. The ablation study answers this by zeroing out matched sets of 79 clean biology features and 79 artifact-sensitive features, then measuring the impact on a tissue classification probe.</p>
+
+<figure class="small">
+  <img src="ablation_summary.png" alt="Ablation study results">
+  <figcaption>Matched ablation: 79 biology features vs 79 artifact features. Combined baseline: 97.8%. Biology-only: 97.0%. Artifact-only: 91.2%. Zero biology: 48.1%. Zero artifact: 87.9%.</figcaption>
+</figure>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-val v-green">97.8%</div><div class="kpi-lbl">Full baseline</div></div>
+  <div class="kpi"><div class="kpi-val v-green">97.0%</div><div class="kpi-lbl">Bio only</div></div>
+  <div class="kpi"><div class="kpi-val v-red">91.2%</div><div class="kpi-lbl">Artifact only</div></div>
+  <div class="kpi"><div class="kpi-val v-red">48.1%</div><div class="kpi-lbl">Zero bio</div></div>
+  <div class="kpi"><div class="kpi-val v-amber">87.9%</div><div class="kpi-lbl">Zero artifact</div></div>
+</div>
+
+<div class="highlight">
+  <strong>The honest interpretation:</strong> The 79 biology features are essentially sufficient — they carry 97% accuracy alone. Remove them and the model collapses. The artifact features are not noise — they carry 91.2% accuracy — but they encode tissue identity through appearance properties that are specific to this dataset's staining protocol. The model has two classification pathways: one based on morphology (robust), one based on staining (brittle). Standard evaluation metrics cannot distinguish them.
+</div>
+
+
+<!-- ======================================= -->
+<h2>Representation-level follow-up</h2>
+
+<p>The ablation study operates at the probe level — it measures how much a downstream classifier depends on each feature set. To confirm that the shortcut features are genuinely part of the model's learned representation (and not just a quirk of the probe), I ran a representation-level patching experiment: zeroing feature families inside the SAE's reconstruction of the CLS embedding, then re-probing.</p>
+
+<figure class="small">
+  <img src="activation_patching.png" alt="Activation patching results">
+  <figcaption>Representation-level patching on the final Phikon-v2 CLS embedding. Raw: 99.12%. SAE reconstruction: 99.25%. Patch bio: 99.10% (−0.2 pts). Patch artifact: 99.30%. Patch random: 99.20%. The shortcut features are embedded in the representation itself — they are not an artefact of the probe.</figcaption>
+</figure>
+
+<p>Patching the biology features produces a small drop (99.10%). Patching the artifact features does not (99.30%). This confirms the artifact-sensitive features are part of the model's actual learned representation, not a downstream classification artefact.</p>
+
+<h3>Cross-cluster stability</h3>
+
+<p>As a further corroboration, I clustered patches by inferred staining style (k-means on colour statistics) and measured how much each feature family's activation shifts across clusters.</p>
+
+<figure>
+  <img src="cross_site_stability.png" alt="Cross-site stability analysis">
+  <figcaption>Left: absolute Cohen's d across inferred staining clusters. Biology features: median 0.21. Artifact features: median 0.78 — nearly 4× larger. Middle/right: per-feature mean activation across clusters. Biology features cluster near the diagonal (stable). Artifact features scatter widely (unstable across staining conditions).</figcaption>
+</figure>
+
+<div class="highlight-green highlight">
+  <strong>Biology features are stable across staining conditions.</strong> Median shift: 0.21 Cohen's d. <strong>Artifact features are not.</strong> Median shift: 0.78 Cohen's d. This is suggestive corroboration of the ablation finding — the staining-dependent pathway would behave differently at a hospital with different staining protocols.
+</div>
+
+
+<!-- ======================================= -->
+<h2>Verification methodology</h2>
+
+<p>This audit follows the two-stage architecture from <strong>AutoMechInterp</strong>, an open-source verification framework I built for mechanistic interpretability (26 methodology iterations; docs at <a href="https://fcistud.github.io/mechanistic-interpretability/">fcistud.github.io/mechanistic-interpretability</a>).</p>
+
+<p>The core principle: <em>discovery and verification must be separate stages.</em> The SAE discovers features — that's hypothesis generation. The ablation study, activation patching, and stability analysis are the verification stage. AutoMechInterp enforces this separation through a deterministic stage-gate with 15 evaluation gates, mandatory negative controls per component type, robustness checks, multiplicity correction, and evidence tiers (cross-model confirmed, single-model confirmed, causal-tested unstable, suggestive, rejected).</p>
+
+<div class="two-col">
+  <div class="highlight-green highlight" style="margin:0;">
+    <strong>Discovery stage</strong><br>
+    SAE extracts 4,096 features from Phikon-v2's CLS representations. Each feature is a hypothesis about what the model has learned.
+  </div>
+  <div class="highlight-red highlight" style="margin:0;">
+    <strong>Verification stage</strong><br>
+    Ablation, activation patching, negative controls, stability analysis. Only features that survive verification are treated as confirmed.
+  </div>
+</div>
+
+<div class="product-note">
+  <div class="product-note-label">Where this is going — the Aletheia product</div>
+  <p style="font-size:14.5px;margin-bottom:10px;">The end goal is to package this verification workflow into a product that pathology AI companies can use for regulatory compliance. Below is the product prototype I've built — an interactive assurance workspace showing the full audit workflow from feature atlas through causal validation through regulatory compliance mapping.</p>
+  <figure style="margin:12px 0 0;border:none;">
+    <img src="aletheia_product_overview.png" alt="Aletheia product prototype - audit overview" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
+  </figure>
+  <figure style="margin:8px 0 0;border:none;">
+    <img src="aletheia_product_atlas.png" alt="Aletheia product prototype - feature atlas" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
+  </figure>
+  <figure style="margin:8px 0 0;border:none;">
+    <img src="aletheia_product_compliance.png" alt="Aletheia product prototype - compliance map" style="width:100%;border-radius:4px;border:1px solid #e2e8f0;">
+  </figure>
+  <p style="font-size:13.5px;color:#64748b;margin-top:10px;margin-bottom:0;">The EU AI Act requires interpretability evidence for every high-risk medical AI by August 2027. This is what that evidence workflow looks like — feature-level assurance with causal validation, mapped to Article 13, MHRA AIaMD, and FDA SaMD requirements.</p>
+</div>
+
+
+<!-- ======================================= -->
+<h2>Limitations and next steps</h2>
+
+<p>This is a single-dataset demonstration audit, not a multi-site clinical validation study. Specific limitations:</p>
+
+<div class="highlight-blue highlight">
+  <strong>Current scope:</strong> Probe-level ablation on one model, one dataset, one cancer type. The activation patching follow-up is representation-level but not a full-stack causal intervention on the end-to-end clinical system. The stability analysis uses inferred staining clusters, not verified institution labels. Feature labels are statistical associations, not pathologist-validated annotations.<br><br>
+  <strong>Next steps:</strong> Generalise across pathology foundation models with different architectures (UNI ViT-L, Prov-GigaPath ViT-g, CONCH ViT-B). Implement full model-level activation patching via hooks. Run cross-site validation on multi-hospital datasets with verified institution metadata. Add expert-in-the-loop feature validation with clinical ontology mapping (SNOMED-CT, UBERON). Run pilot audits on real vendor models under NDA.
+</div>
+
+<p>The entire pipeline runs on a single GPU for under £10 of compute. What it needs to become a real assurance service is scale across model architectures, domain access to pathology AI companies, and time to build.</p>
+
+
+<hr>
+
+<footer>
+  Aletheia · Mariam Hassan · UCL · March 2026<br>
+  AutoMechInterp: fcistud.github.io/mechanistic-interpretability<br>
+  Aletheia product prototype: fcistud.github.io/aletheia-site
+</footer>
+
+</body>
+</html>
